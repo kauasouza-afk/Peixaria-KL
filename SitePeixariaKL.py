@@ -64,210 +64,208 @@ else:
 # ==========================================
 # DESIGN MODERNO (CSS CUSTOMIZADO)
 # ==========================================
-st.markdown(f"""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+st.markdown(f"""<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-    html, body, [class*="css"] {{
-        font-family: 'Plus Jakarta Sans', sans-serif;
-    }}
-    .stApp {{
-        background: {bg_app};
-    }}
+html, body, [class*="css"] {{
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}}
+.stApp {{
+    background: {bg_app};
+}}
 
-    /* Esconde menu padrão superior do Streamlit */
-    #MainMenu {{visibility: hidden;}}
-    footer {{visibility: hidden;}}
-    header[data-testid="stHeader"] {{background: transparent;}}
+/* Esconde menu padrão superior do Streamlit */
+#MainMenu {{visibility: hidden;}}
+footer {{visibility: hidden;}}
+header[data-testid="stHeader"] {{background: transparent;}}
 
-    /* Banner Hero Moderno */
-    .hero-modern {{
-        background: radial-gradient(circle at top right, #0ea5e9 0%, #0369a1 35%, #081b33 100%);
-        padding: 38px 28px;
-        border-radius: 24px;
-        color: white;
-        text-align: center;
-        box-shadow: 0 20px 40px -15px rgba(8, 27, 51, 0.35);
-        margin-bottom: 24px;
-        position: relative;
-        overflow: hidden;
-    }}
-    .hero-pill {{
-        display: inline-block;
-        background: rgba(255, 255, 255, 0.14);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        color: #7dd3fc;
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        padding: 6px 16px;
-        border-radius: 999px;
-        margin-bottom: 12px;
-    }}
-    .stApp .hero-modern h1 {{
-        color: #ffffff !important;
-        margin: 0;
-        font-size: 2.9rem;
-        font-weight: 800;
-        letter-spacing: -1px;
-        line-height: 1.1;
-    }}
-    .stApp .hero-modern h1 span {{
-        background: linear-gradient(90deg, #38bdf8, #67e8f9);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }}
-    .stApp .hero-modern p {{
-        margin: 12px auto 22px auto;
-        max-width: 650px;
-        font-size: 1.05rem;
-        color: #e0f2fe !important;
-        font-weight: 400;
-    }}
-    .hero-features {{
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 10px;
-    }}
-    .feature-chip {{
-        background: rgba(8, 27, 51, 0.45);
-        border: 1px solid rgba(125, 211, 252, 0.3);
-        padding: 7px 15px;
-        border-radius: 12px;
-        font-size: 0.84rem;
-        color: #f0f9ff !important;
-        font-weight: 600;
-    }}
+/* Banner Hero Moderno */
+.hero-modern {{
+    background: radial-gradient(circle at top right, #0ea5e9 0%, #0369a1 35%, #081b33 100%);
+    padding: 38px 28px;
+    border-radius: 24px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 20px 40px -15px rgba(8, 27, 51, 0.35);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}}
+.hero-pill {{
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #7dd3fc;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+}}
+.stApp .hero-modern h1 {{
+    color: #ffffff !important;
+    margin: 0;
+    font-size: 2.9rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+}}
+.stApp .hero-modern h1 span {{
+    background: linear-gradient(90deg, #38bdf8, #67e8f9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}}
+.stApp .hero-modern p {{
+    margin: 12px auto 22px auto;
+    max-width: 650px;
+    font-size: 1.05rem;
+    color: #e0f2fe !important;
+    font-weight: 400;
+}}
+.hero-features {{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}}
+.feature-chip {{
+    background: rgba(8, 27, 51, 0.45);
+    border: 1px solid rgba(125, 211, 252, 0.3);
+    padding: 7px 15px;
+    border-radius: 12px;
+    font-size: 0.84rem;
+    color: #f0f9ff !important;
+    font-weight: 600;
+}}
 
-    /* Card de Produto Moderno */
-    .product-card {{
-        background: {bg_card};
-        border-radius: 18px;
-        padding: 18px;
-        border: 1px solid {border_card};
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        margin-bottom: 10px;
-    }}
-    .product-card:hover {{
-        transform: translateY(-4px);
-        box-shadow: 0 14px 28px -8px rgba(2, 132, 199, 0.25);
-        border-color: #38bdf8;
-    }}
-    .card-top-row {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-    }}
-    .cat-badge {{
-        background: {bg_cat_badge};
-        color: {text_cat_badge};
-        font-size: 0.74rem;
-        font-weight: 700;
-        padding: 4px 11px;
-        border-radius: 999px;
-        border: 1px solid {border_cat_badge};
-    }}
-    .weight-badge {{
-        background: {bg_weight_badge};
-        color: {text_weight_badge};
-        font-size: 0.76rem;
-        font-weight: 700;
-        padding: 4px 10px;
-        border-radius: 8px;
-        border: 1px solid {border_weight_badge};
-    }}
+/* Card de Produto Moderno */
+.product-card {{
+    background: {bg_card};
+    border-radius: 18px;
+    padding: 18px;
+    border: 1px solid {border_card};
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 10px;
+}}
+.product-card:hover {{
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px -8px rgba(2, 132, 199, 0.25);
+    border-color: #38bdf8;
+}}
+.card-top-row {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}}
+.cat-badge {{
+    background: {bg_cat_badge};
+    color: {text_cat_badge};
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 4px 11px;
+    border-radius: 999px;
+    border: 1px solid {border_cat_badge};
+}}
+.weight-badge {{
+    background: {bg_weight_badge};
+    color: {text_weight_badge};
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid {border_weight_badge};
+}}
 
-    /* Foto limpa e responsiva quando cadastrada na planilha */
-    .product-photo-box {{
-        width: 100%;
-        height: 170px;
-        border-radius: 14px;
-        overflow: hidden;
-        margin-bottom: 12px;
-        background-color: #0f172a;
-    }}
-    .product-photo-img {{
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        transition: transform 0.3s ease;
-    }}
-    .product-card:hover .product-photo-img {{
-        transform: scale(1.05);
-    }}
+/* Foto limpa e responsiva quando cadastrada na planilha */
+.product-photo-box {{
+    width: 100%;
+    height: 170px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    background-color: #0f172a;
+}}
+.product-photo-img {{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}}
+.product-card:hover .product-photo-img {{
+    transform: scale(1.05);
+}}
 
-    .prod-name {{
-        color: {text_main};
-        font-size: 1.12rem;
-        font-weight: 700;
-        line-height: 1.35;
-        min-height: 48px;
-        margin: 6px 0 14px 0;
-        text-align: left;
-    }}
-    .price-row {{
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        padding-top: 12px;
-        border-top: 1px solid {border_divider};
-    }}
-    .price-label {{
-        font-size: 0.78rem;
-        color: {text_muted};
-        font-weight: 500;
-    }}
-    .price-number {{
-        font-size: 1.45rem;
-        font-weight: 800;
-        color: {price_color};
-        letter-spacing: -0.5px;
-    }}
+.prod-name {{
+    color: {text_main};
+    font-size: 1.12rem;
+    font-weight: 700;
+    line-height: 1.35;
+    min-height: 48px;
+    margin: 6px 0 14px 0;
+    text-align: left;
+}}
+.price-row {{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid {border_divider};
+}}
+.price-label {{
+    font-size: 0.78rem;
+    color: {text_muted};
+    font-weight: 500;
+}}
+.price-number {{
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: {price_color};
+    letter-spacing: -0.5px;
+}}
 
-    /* Botões Streamlit Estilizados */
-    div.stButton > button {{
-        border-radius: 12px;
-        font-weight: 600;
-        transition: all 0.2s ease;
-    }}
-    div.stButton > button[kind="primary"] {{
-        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-        border: none;
-        color: white;
-        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
-    }}
+/* Botões Streamlit Estilizados */
+div.stButton > button {{
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}}
+div.stButton > button[kind="primary"] {{
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+}}
 
-    /* Rodapé Moderno */
-    .modern-footer {{
-        background: #081b33;
-        color: #cbd5e1;
-        padding: 34px 24px;
-        border-radius: 22px;
-        text-align: center;
-        margin-top: 48px;
-        box-shadow: 0 -4px 20px rgba(8, 27, 51, 0.08);
-    }}
-    .stApp .modern-footer h3 {{
-        color: #ffffff !important;
-        font-weight: 800;
-        margin-bottom: 8px;
-    }}
+/* Rodapé Moderno */
+.modern-footer {{
+    background: #081b33;
+    color: #cbd5e1;
+    padding: 34px 24px;
+    border-radius: 22px;
+    text-align: center;
+    margin-top: 48px;
+    box-shadow: 0 -4px 20px rgba(8, 27, 51, 0.08);
+}}
+.stApp .modern-footer h3 {{
+    color: #ffffff !important;
+    font-weight: 800;
+    margin-bottom: 8px;
+}}
 
-    /* Textos gerais acompanhando o tema escolhido */
-    .stApp h1, .stApp h2, .stApp h3, .stApp label, .stApp .stMarkdown p, .stApp [data-testid="stCaptionContainer"] {{
-        color: {text_main} !important;
-    }}
-    .stApp .hero-modern h1, .stApp .hero-modern p, .stApp .modern-footer h3, .stApp .modern-footer p, section[data-testid="stSidebar"] * {{
-        color: #ffffff !important;
-    }}
-    </style>
-""", unsafe_allow_html=True)
+/* Textos gerais acompanhando o tema escolhido */
+.stApp h1, .stApp h2, .stApp h3, .stApp label, .stApp .stMarkdown p, .stApp [data-testid="stCaptionContainer"] {{
+    color: {text_main} !important;
+}}
+.stApp .hero-modern h1, .stApp .hero-modern p, .stApp .modern-footer h3, .stApp .modern-footer p, section[data-testid="stSidebar"] * {{
+    color: #ffffff !important;
+}}
+</style>""", unsafe_allow_html=True)
 
 ICONES_CATEGORIA = {
     "Filés": "🐟",
@@ -489,18 +487,16 @@ if "carrinho" not in st.session_state:
 # ==========================================
 # BANNER HERO MODERNO
 # ==========================================
-st.markdown(f"""
-    <div class="hero-modern">
-        <div class="hero-pill">🌊 Catálogo Digital Oficial</div>
-        <h1>🐟 Peixaria <span>KL</span></h1>
-        <p>{SLOGAN}</p>
-        <div class="hero-features">
-            <span class="feature-chip">❄️ Frescor Garantido</span>
-            <span class="feature-chip">⚡ Pedido Rápido no WhatsApp</span>
-            <span class="feature-chip">📍 {ENDERECO_LOJA}</span>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown(f"""<div class="hero-modern">
+<div class="hero-pill">🌊 Catálogo Digital Oficial</div>
+<h1>🐟 Peixaria <span>KL</span></h1>
+<p>{SLOGAN}</p>
+<div class="hero-features">
+<span class="feature-chip">❄️ Frescor Garantido</span>
+<span class="feature-chip">⚡ Pedido Rápido no WhatsApp</span>
+<span class="feature-chip">📍 {ENDERECO_LOJA}</span>
+</div>
+</div>""", unsafe_allow_html=True)
 
 # ==========================================
 # BARRA DE AÇÕES RÁPIDAS + SELETOR DE TEMA
@@ -675,26 +671,20 @@ else:
             foto_url = obter_foto_produto(row)
             bloco_foto = ""
             if foto_url:
-                bloco_foto = f"""
-                    <div class="product-photo-box">
-                        <img src="{foto_url}" class="product-photo-img" alt="{row['Produto']}" onerror="this.parentElement.style.display='none'">
-                    </div>
-                """
+                bloco_foto = f'<div class="product-photo-box"><img src="{foto_url}" class="product-photo-img" alt="{row["Produto"]}" onerror="this.parentElement.style.display=\'none\'"></div>'
 
-            st.markdown(f"""
-                <div class="product-card">
-                    <div class="card-top-row">
-                        <span class="cat-badge">{icone_cat} {row['Categoria']}</span>
-                        <span class="weight-badge">{badge_peso}</span>
-                    </div>
-                    {bloco_foto}
-                    <div class="prod-name">{row['Produto']}</div>
-                    <div class="price-row">
-                        <span class="price-label">{label_preco}</span>
-                        <span class="price-number">{preco_exibicao}</span>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f"""<div class="product-card">
+<div class="card-top-row">
+<span class="cat-badge">{icone_cat} {row['Categoria']}</span>
+<span class="weight-badge">{badge_peso}</span>
+</div>
+{bloco_foto}
+<div class="prod-name">{row['Produto']}</div>
+<div class="price-row">
+<span class="price-label">{label_preco}</span>
+<span class="price-number">{preco_exibicao}</span>
+</div>
+</div>""", unsafe_allow_html=True)
 
             if st.button("🛒 Adicionar", key=f"add_{idx}", use_container_width=True):
                 chave = f"{row['Produto']}_{row['Peso']}"
@@ -713,14 +703,12 @@ else:
 # ==========================================
 # RODAPÉ MODERNO
 # ==========================================
-st.markdown(f"""
-    <div class="modern-footer">
-        <h3>🐟 {NOME_LOJA}</h3>
-        <p style="margin:4px 0; color:#e2e8f0;">📍 {ENDERECO_LOJA}</p>
-        <p style="margin:4px 0; color:#e2e8f0;">🕒 {HORARIO_ATENDIMENTO}</p>
-        <p style="margin:4px 0; color:#7dd3fc;">🚚 {CIDADE_REGIAO} • 📱 WhatsApp: <b>{TELEFONE_EXIBICAO}</b></p>
-        <p style="margin-top:14px; font-size:0.78rem; color:#94a3b8;">
-            * Valores sujeitos à disponibilidade de estoque. Itens por kg são pesados na balança e confirmados pelo WhatsApp. Taxa de entrega: R$ {TAXA_ENTREGA:,.2f}.
-        </p>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown(f"""<div class="modern-footer">
+<h3>🐟 {NOME_LOJA}</h3>
+<p style="margin:4px 0; color:#e2e8f0;">📍 {ENDERECO_LOJA}</p>
+<p style="margin:4px 0; color:#e2e8f0;">🕒 {HORARIO_ATENDIMENTO}</p>
+<p style="margin:4px 0; color:#7dd3fc;">🚚 {CIDADE_REGIAO} • 📱 WhatsApp: <b>{TELEFONE_EXIBICAO}</b></p>
+<p style="margin-top:14px; font-size:0.78rem; color:#94a3b8;">
+* Valores sujeitos à disponibilidade de estoque. Itens por kg são pesados na balança e confirmados pelo WhatsApp. Taxa de entrega: R$ {TAXA_ENTREGA:,.2f}.
+</p>
+</div>""", unsafe_allow_html=True)
