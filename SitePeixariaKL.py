@@ -181,7 +181,7 @@ st.markdown(f"""
         border: 1px solid {border_weight_badge};
     }}
 
-    /* Foto real recortada em formato de peixe */
+    /* Foto específica recortada em formato de peixe */
     .fish-photo-wrapper {{
         display: flex;
         justify-content: center;
@@ -190,8 +190,8 @@ st.markdown(f"""
         filter: drop-shadow(0 6px 10px rgba(2, 132, 199, 0.28));
     }}
     .fish-shape-img {{
-        width: 195px;
-        height: 112px;
+        width: 205px;
+        height: 118px;
         object-fit: cover;
         background-color: #0c4a6e;
         clip-path: polygon(
@@ -280,29 +280,105 @@ ICONES_CATEGORIA = {
     "Diversos": "🦀",
 }
 
+# ==========================================
+# FOTOS ESPECÍFICAS POR PRODUTO EXATO
+# (Basta colar o link específico entre as aspas de cada peixe ou na coluna 'Imagem' da planilha)
+# ==========================================
+FOTO_PADRAO = "https://images.unsplash.com/photo-1534943441045-1009d7cb0bb9?auto=format&fit=crop&w=500&q=80"
+
+FOTOS_ESPECIFICAS = {
+    # --- FILÉS ---
+    "Filé de Bacalhau": "https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?auto=format&fit=crop&w=500&q=80",
+    "Filé de Cavalinha": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=500&q=80",
+    "Filé de Corvina": "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=500&q=80",
+    "Filé de Merluza": "https://images.unsplash.com/photo-1510130387422-82bed34b37e9?auto=format&fit=crop&w=500&q=80",
+    "Filézinho de Pacu": "https://images.unsplash.com/photo-1553659971-f01207815844?auto=format&fit=crop&w=500&q=80",
+    "Filé de Pangasius": "https://images.unsplash.com/photo-1534943441045-1009d7cb0bb9?auto=format&fit=crop&w=500&q=80",
+    "Filé de Pirarucu em Pedaços": "https://images.unsplash.com/photo-1535140728325-a4d3707eee61?auto=format&fit=crop&w=500&q=80",
+    "Filé de Porquinho": "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=500&q=80",
+    "Filé de Salmão": "https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?auto=format&fit=crop&w=500&q=80",
+    "Filé de Tilápia": "https://images.unsplash.com/photo-1534943441045-1009d7cb0bb9?auto=format&fit=crop&w=500&q=80",
+    "Filé de Tucunaré": "https://images.unsplash.com/photo-1510130387422-82bed34b37e9?auto=format&fit=crop&w=500&q=80",
+    "Filé de Trilha": "https://images.unsplash.com/photo-1553659971-f01207815844?auto=format&fit=crop&w=500&q=80",
+    "Filé de Uritinga (Pintado da Amazônia)": "https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?auto=format&fit=crop&w=500&q=80",
+    "Sardinha Espalmada": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=500&q=80",
+    "Traíra Espalmada Retalhada": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=500&q=80",
+
+    # --- POSTAS ---
+    "Costelinha de Pacu": "https://images.unsplash.com/photo-1535140728325-a4d3707eee61?auto=format&fit=crop&w=500&q=80",
+    "Posta de Barbado": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80",
+    "Posta de Cascudo": "https://images.unsplash.com/photo-1535140728325-a4d3707eee61?auto=format&fit=crop&w=500&q=80",
+    "Posta de Cação": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80",
+    "Posta de Tilápia": "https://images.unsplash.com/photo-1535140728325-a4d3707eee61?auto=format&fit=crop&w=500&q=80",
+    "Posta de Pintado": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80",
+
+    # --- PEIXES INTEIROS ---
+    "Cavalinha Inteira": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=500&q=80",
+    "Corvina (G)": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=500&q=80",
+    "Curimba": "https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?auto=format&fit=crop&w=500&q=80",
+    "Lambari": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=500&q=80",
+    "Mandi": "https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=500&q=80",
+    "Manjubinha Eviscerada sem Cabeça": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=500&q=80",
+    "Pacu / Tambaqui com Escamas": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=500&q=80",
+    "Piapara": "https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?auto=format&fit=crop&w=500&q=80",
+    "Piau 3 Pintas": "https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=500&q=80",
+    "Sardinha Inteira Eviscerada sem Cabeça": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=500&q=80",
+    "Tainha": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=500&q=80",
+    "Toquinho de Cascudo": "https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=500&q=80",
+    "Tilápia Eviscerada com Escamas": "https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?auto=format&fit=crop&w=500&q=80",
+    "Tilápia Eviscerada sem Escamas": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=500&q=80",
+    "Traíra": "https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=500&q=80",
+    "Traíra (G)": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=500&q=80",
+    "Tucunaré (G)": "https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?auto=format&fit=crop&w=500&q=80",
+
+    # --- CAMARÕES ---
+    "Camarão (P)": "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=500&q=80",
+    "Camarão (M)": "https://images.unsplash.com/photo-1625943553852-781c6dd46faa?auto=format&fit=crop&w=500&q=80",
+    "Camarão (G)": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80",
+
+    # --- PRONTOS PARA FRITAR ---
+    "Bolinho de Bacalhau": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=500&q=80",
+    "Bolinho de Bacalhau Gourmet": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=500&q=80",
+    "Bolinho de Camarão": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80",
+    "Bolinho de Carne Seca com Mandioca": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=500&q=80",
+    "Bolinho de Costela": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=500&q=80",
+    "Bolinho de Salmão": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=500&q=80",
+    "Bolinho de Tilápia com Queijo": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=500&q=80",
+    "Camarão Empanado com Requeijão": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80",
+    "Camarão Empanado": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80",
+    "Chips de Tilápia Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80",
+    "Espetinho de Tilápia com Bacon": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80",
+    "Espetinho de Tilápia com Provolone": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80",
+    "Filé de Porquinho Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80",
+    "Iscas de Pintado Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80",
+    "Lambari Desossado e Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80",
+    "Moldado de Tilápia Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80",
+    "Queijo Cura Empanado": "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=500&q=80",
+    "Tiras de Merluza Empanada": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80",
+    "Tirinhas de Pangasius Empanadas": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80",
+    "Tirinhas de Tilápia Empanadas": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80",
+    "Torresmo de Pacu Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80",
+
+    # --- DIVERSOS ---
+    "Anel de Lula": "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=500&q=80",
+    "Caranguejo": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80",
+    "Farinha para Empanar": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=80",
+    "Kani Kama": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=500&q=80",
+    "Mandioca": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=500&q=80",
+    "Mexilhão Desconchado": "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=500&q=80",
+    "Sardinha Salgada": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=500&q=80",
+    "Siri": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80",
+}
+
 def obter_foto_produto(row):
-    # Se algum dia você criar uma coluna 'Imagem' na planilha e colocar um link, ele usa ela
+    # 1. Se você colocar uma coluna 'Imagem' na planilha do Google com o link da foto daquele peixe, ele usa ela:
     img_planilha = str(row.get("Imagem", "")).strip()
     if img_planilha and img_planilha.lower() != "nan":
         return img_planilha
 
-    # Caso contrário, escolhe automaticamente uma foto real correspondente ao produto
-    texto = f"{row.get('Produto', '')} {row.get('Categoria', '')}".lower()
-    if "salmão" in texto or "salmao" in texto:
-        return "https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?auto=format&fit=crop&w=500&q=80"
-    elif "camarão" in texto or "camarao" in texto:
-        return "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=500&q=80"
-    elif "bolinho" in texto or "pronto" in texto or "empanad" in texto or "chips" in texto or "torresmo" in texto:
-        return "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
-    elif "posta" in texto or "pintado" in texto or "cação" in texto or "cacao" in texto:
-        return "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
-    elif "inteir" in texto or "sardinha" in texto or "traíra" in texto or "traira" in texto or "lambari" in texto:
-        return "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=500&q=80"
-    elif "lula" in texto or "caranguejo" in texto or "siri" in texto or "mexilhão" in texto or "mexilhao" in texto:
-        return "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
-    else:
-        # Filés e peixes frescos em geral
-        return "https://images.unsplash.com/photo-1534943441045-1009d7cb0bb9?auto=format&fit=crop&w=500&q=80"
+    # 2. Caso contrário, busca pelo nome exato do produto no dicionário individual acima:
+    nome_produto = str(row.get("Produto", "")).strip()
+    return FOTOS_ESPECIFICAS.get(nome_produto, FOTO_PADRAO)
 
 DADOS_PADRAO = [
     ("Filés", "Filé de Bacalhau", "kg", 57.00, "Sim"),
@@ -559,7 +635,7 @@ else:
                         <span class="weight-badge">📦 {row['Peso']}</span>
                     </div>
                     <div class="fish-photo-wrapper">
-                        <img src="{foto_url}" class="fish-shape-img" alt="{row['Produto']}">
+                        <img src="{foto_url}" class="fish-shape-img" alt="{row['Produto']}" onerror="this.src='{FOTO_PADRAO}'">
                     </div>
                     <div class="prod-name">{row['Produto']}</div>
                     <div class="price-row">
