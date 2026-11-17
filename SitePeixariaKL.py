@@ -181,33 +181,27 @@ st.markdown(f"""
         border: 1px solid {border_weight_badge};
     }}
 
-    /* Silhueta ilustrada em formato de peixe */
-    .fish-badge-wrapper {{
+    /* Foto real recortada em formato de peixe */
+    .fish-photo-wrapper {{
         display: flex;
         justify-content: center;
         align-items: center;
-        margin: 10px 0 12px 0;
-        filter: drop-shadow(0 4px 8px rgba(2, 132, 199, 0.25));
+        margin: 8px 0 12px 0;
+        filter: drop-shadow(0 6px 10px rgba(2, 132, 199, 0.28));
     }}
-    .fish-shape-art {{
-        width: 175px;
-        height: 76px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding-left: 16px;
-        color: #ffffff;
-        font-weight: 700;
-        font-size: 0.8rem;
-        letter-spacing: 0.4px;
+    .fish-shape-img {{
+        width: 195px;
+        height: 112px;
+        object-fit: cover;
+        background-color: #0c4a6e;
         clip-path: polygon(
             0% 18%, 18% 42%, 35% 15%, 65% 8%, 88% 25%, 100% 50%, 
             88% 75%, 65% 92%, 35% 85%, 18% 58%, 0% 82%, 8% 50%
         );
         transition: transform 0.25s ease;
     }}
-    .product-card:hover .fish-shape-art {{
-        transform: scale(1.05);
+    .product-card:hover .fish-shape-img {{
+        transform: scale(1.06);
     }}
 
     .prod-name {{
@@ -285,6 +279,30 @@ ICONES_CATEGORIA = {
     "Prontos para Fritar": "🍤",
     "Diversos": "🦀",
 }
+
+def obter_foto_produto(row):
+    # Se algum dia você criar uma coluna 'Imagem' na planilha e colocar um link, ele usa ela
+    img_planilha = str(row.get("Imagem", "")).strip()
+    if img_planilha and img_planilha.lower() != "nan":
+        return img_planilha
+
+    # Caso contrário, escolhe automaticamente uma foto real correspondente ao produto
+    texto = f"{row.get('Produto', '')} {row.get('Categoria', '')}".lower()
+    if "salmão" in texto or "salmao" in texto:
+        return "https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?auto=format&fit=crop&w=500&q=80"
+    elif "camarão" in texto or "camarao" in texto:
+        return "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=500&q=80"
+    elif "bolinho" in texto or "pronto" in texto or "empanad" in texto or "chips" in texto or "torresmo" in texto:
+        return "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+    elif "posta" in texto or "pintado" in texto or "cação" in texto or "cacao" in texto:
+        return "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+    elif "inteir" in texto or "sardinha" in texto or "traíra" in texto or "traira" in texto or "lambari" in texto:
+        return "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=500&q=80"
+    elif "lula" in texto or "caranguejo" in texto or "siri" in texto or "mexilhão" in texto or "mexilhao" in texto:
+        return "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+    else:
+        # Filés e peixes frescos em geral
+        return "https://images.unsplash.com/photo-1534943441045-1009d7cb0bb9?auto=format&fit=crop&w=500&q=80"
 
 DADOS_PADRAO = [
     ("Filés", "Filé de Bacalhau", "kg", 57.00, "Sim"),
@@ -532,17 +550,7 @@ else:
         with coluna:
             icone_cat = ICONES_CATEGORIA.get(row["Categoria"], "🐟")
             preco_fmt = f"R$ {row['Preco']:,.2f}".replace(".", ",")
-            
-            cat_lower = str(row.get("Categoria", "")).lower()
-            prod_lower = str(row.get("Produto", "")).lower()
-            if "salm" in prod_lower or "posta" in cat_lower:
-                cor_peixe = "linear-gradient(135deg, #f97316, #ea580c)"
-            elif "camar" in cat_lower or "camar" in prod_lower:
-                cor_peixe = "linear-gradient(135deg, #ec4899, #db2777)"
-            elif "pronto" in cat_lower:
-                cor_peixe = "linear-gradient(135deg, #eab308, #ca8a04)"
-            else:
-                cor_peixe = "linear-gradient(135deg, #0284c7, #0369a1)"
+            foto_url = obter_foto_produto(row)
 
             st.markdown(f"""
                 <div class="product-card">
@@ -550,10 +558,8 @@ else:
                         <span class="cat-badge">{icone_cat} {row['Categoria']}</span>
                         <span class="weight-badge">📦 {row['Peso']}</span>
                     </div>
-                    <div class="fish-badge-wrapper">
-                        <div class="fish-shape-art" style="background: {cor_peixe};">
-                            {icone_cat} {row['Peso']}
-                        </div>
+                    <div class="fish-photo-wrapper">
+                        <img src="{foto_url}" class="fish-shape-img" alt="{row['Produto']}">
                     </div>
                     <div class="prod-name">{row['Produto']}</div>
                     <div class="price-row">
