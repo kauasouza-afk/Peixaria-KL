@@ -142,11 +142,11 @@ st.markdown(f"""
         font-weight: 600;
     }}
 
-    /* Card de Produto Moderno (Sem Imagens) */
+    /* Card de Produto Moderno */
     .product-card {{
         background: {bg_card};
         border-radius: 18px;
-        padding: 20px;
+        padding: 18px;
         border: 1px solid {border_card};
         box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -161,7 +161,7 @@ st.markdown(f"""
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
     }}
     .cat-badge {{
         background: {bg_cat_badge};
@@ -181,6 +181,27 @@ st.markdown(f"""
         border-radius: 8px;
         border: 1px solid {border_weight_badge};
     }}
+
+    /* Foto limpa e responsiva quando cadastrada na planilha */
+    .product-photo-box {{
+        width: 100%;
+        height: 170px;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 12px;
+        background-color: #0f172a;
+    }}
+    .product-photo-img {{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.3s ease;
+    }}
+    .product-card:hover .product-photo-img {{
+        transform: scale(1.05);
+    }}
+
     .prod-name {{
         color: {text_main};
         font-size: 1.12rem;
@@ -257,79 +278,179 @@ ICONES_CATEGORIA = {
     "Diversos": "🦀",
 }
 
+# ==========================================
+# FOTOS ESPECÍFICAS POR PRODUTO EXATO
+# (Cole o link direto da foto entre as aspas OU preencha a coluna 'Imagem' na planilha do Google)
+# ==========================================
+FOTOS_ESPECIFICAS = {
+    # --- FILÉS ---
+    "Filé de Bacalhau": "",
+    "Filé de Cavalinha": "",
+    "Filé de Corvina": "",
+    "Filé de Merluza": "",
+    "Filézinho de Pacu": "",
+    "Filé de Pangasius": "",
+    "Filé de Pirarucu em Pedaços": "",
+    "Filé de Porquinho": "",
+    "Filé de Salmão": "",
+    "Filé de Tilápia": "",
+    "Filé de Tucunaré": "",
+    "Filé de Trilha": "",
+    "Filé de Uritinga (Pintado da Amazônia)": "",
+    "Sardinha Espalmada": "",
+    "Traíra Espalmada Retalhada": "",
+
+    # --- POSTAS ---
+    "Costelinha de Pacu": "",
+    "Posta de Barbado": "",
+    "Posta de Cascudo": "",
+    "Posta de Cação": "",
+    "Posta de Tilápia": "",
+    "Posta de Pintado": "",
+
+    # --- PEIXES INTEIROS ---
+    "Pacu Dessosado": "",
+    "Corvina (G)": "",
+    "Curimba": "",
+    "Lambari": "",
+    "Mandi": "",
+    "Manjubinha Eviscerada sem Cabeça": "",
+    "Pacu / Tambaqui com Escamas": "",
+    "Piapara": "",
+    "Piau 3 Pintas": "",
+    "Sardinha Inteira Eviscerada sem Cabeça": "",
+    "Tainha": "",
+    "Toquinho de Cascudo": "",
+    "Tilápia Eviscerada com Escamas": "",
+    "Tilápia Dessosada sem Escamas": "",
+    "Traíra": "",
+    "Traíra (G)": "",
+    "Tucunaré (G)": "",
+
+    # --- CAMARÕES ---
+    "Camarão (P)": "",
+    "Camarão (M)": "",
+    "Camarão (G)": "",
+
+    # --- PRONTOS PARA FRITAR ---
+    "Bolinho de Bacalhau": "",
+    "Bolinho de Bacalhau Gourmet": "",
+    "Bolinho de Camarão": "",
+    "Bolinho de Carne Seca com Mandioca": "",
+    "Bolinho de Costela": "",
+    "Bolinho de Salmão": "",
+    "Bolinho de Tilápia com Queijo": "",
+    "Camarão Empanado com Requeijão": "",
+    "Camarão Empanado": "",
+    "Chips de Tilápia Empanado": "",
+    "Espetinho de Tilápia com Bacon": "",
+    "Espetinho de Tilápia com Provolone": "",
+    "Filé de Porquinho Empanado": "",
+    "Iscas de Pintado Empanado": "",
+    "Lambari Desossado e Empanado": "",
+    "Moldado de Tilápia Empanado": "",
+    "Queijo Cura Empanado": "",
+    "Tiras de Merluza Empanada": "",
+    "Tirinhas de Pangasius Empanadas": "",
+    "Tirinhas de Tilápia Empanadas": "",
+    "Torresmo de Pacu Empanado": "",
+    "Iscas de Filé de Frango Empanado": "",
+
+    # --- DIVERSOS ---
+    "Anel de Lula": "",
+    "Caranguejo": "",
+    "Farinha para Empanar": "",
+    "Kani Kama": "",
+    "Mandioca": "",
+    "Mexilhão Desconchado": "",
+    "Sardinha Salgada": "",
+    "Siri": "",
+}
+
+def obter_foto_produto(row):
+    # 1. Prioridade máxima: link preenchido na coluna 'Imagem' da sua planilha do Google
+    img_planilha = str(row.get("Imagem", "")).strip()
+    if img_planilha and img_planilha.lower() not in ["nan", "none", ""]:
+        return img_planilha
+
+    # 2. Caso contrário, verifica se há link cadastrado no dicionário FOTOS_ESPECIFICAS acima
+    nome_produto = str(row.get("Produto", "")).strip()
+    return FOTOS_ESPECIFICAS.get(nome_produto, "").strip()
+
 DADOS_PADRAO = [
-    ("Filés", "Filé de Bacalhau", "kg", 57.00, "Sim"),
-    ("Filés", "Filé de Cavalinha", "500g", 15.00, "Sim"),
-    ("Filés", "Filé de Corvina", "500g", 19.00, "Sim"),
-    ("Filés", "Filé de Corvina", "1kg", 37.00, "Sim"),
-    ("Filés", "Filé de Merluza", "500g", 19.50, "Sim"),
-    ("Filés", "Filézinho de Pacu", "500g", 21.00, "Sim"),
-    ("Filés", "Filé de Pangasius", "1kg", 40.00, "Sim"),
-    ("Filés", "Filé de Pirarucu em Pedaços", "500g", 26.00, "Sim"),
-    ("Filés", "Filé de Porquinho", "500g", 21.00, "Sim"),
-    ("Filés", "Filé de Salmão", "kg", 89.99, "Sim"),
-    ("Filés", "Filé de Tilápia", "500g", 27.00, "Sim"),
-    ("Filés", "Filé de Tilápia", "1kg", 53.00, "Sim"),
-    ("Filés", "Filé de Tucunaré", "500g", 25.00, "Sim"),
-    ("Filés", "Filé de Trilha", "500g", 21.00, "Sim"),
-    ("Filés", "Filé de Uritinga (Pintado da Amazônia)", "1Kg", 45.00, "Sim"),
-    ("Filés", "Sardinha Espalmada", "500g", 15.00, "Sim"),
-    ("Filés", "Traíra Espalmada Retalhada", "kg", 36.00, "Sim"),
-    ("Postas", "Costelinha de Pacu", "500g", 21.00, "Sim"),
-    ("Postas", "Posta de Barbado", "500g", 16.50, "Sim"),
-    ("Postas", "Posta de Cascudo", "500g", 14.00, "Sim"),
-    ("Postas", "Posta de Cação", "Kg", 43.00, "Sim"),
-    ("Postas", "Posta de Tilápia", "1kg", 35.00, "Sim"),
-    ("Postas", "Posta de Pintado", "kg", 60.00, "Sim"),
-    ("Peixes Inteiros", "Cavalinha Inteira", "kg", 20.00, "Sim"),
-    ("Peixes Inteiros", "Corvina (G)", "kg", 27.00, "Sim"),
-    ("Peixes Inteiros", "Curimba", "kg", 18.00, "Sim"),
-    ("Peixes Inteiros", "Lambari", "500g", 21.00, "Sim"),
-    ("Peixes Inteiros", "Mandi", "kg", 24.00, "Sim"),
-    ("Peixes Inteiros", "Manjubinha Eviscerada sem Cabeça", "500g", 18.00, "Sim"),
-    ("Peixes Inteiros", "Pacu / Tambaqui com Escamas", "kg", 30.00, "Sim"),
-    ("Peixes Inteiros", "Piapara", "kg", 25.00, "Sim"),
-    ("Peixes Inteiros", "Piau 3 Pintas", "kg", 15.00, "Sim"),
-    ("Peixes Inteiros", "Sardinha Inteira Eviscerada sem Cabeça", "500g", 12.50, "Sim"),
-    ("Peixes Inteiros", "Tainha", "kg", 27.00, "Sim"),
-    ("Peixes Inteiros", "Toquinho de Cascudo", "500g", 13.00, "Sim"),
-    ("Peixes Inteiros", "Tilápia Eviscerada com Escamas", "kg", 27.00, "Sim"),
-    ("Peixes Inteiros", "Tilápia Eviscerada sem Escamas", "kg", 30.00, "Sim"),
-    ("Peixes Inteiros", "Traíra", "kg", 20.00, "Sim"),
-    ("Peixes Inteiros", "Traíra (G)", "kg", 27.00, "Sim"),
-    ("Peixes Inteiros", "Tucunaré (G)", "kg", 30.00, "Sim"),
-    ("Camarões", "Camarão (P)", "500g", 28.00, "Sim"),
-    ("Camarões", "Camarão (M)", "500g", 39.50, "Sim"),
-    ("Camarões", "Camarão (G)", "500g", 48.50, "Sim"),
-    ("Prontos para Fritar", "Bolinho de Bacalhau", "500g", 23.90, "Sim"),
-    ("Prontos para Fritar", "Bolinho de Bacalhau Gourmet", "500g", 30.00, "Sim"),
-    ("Prontos para Fritar", "Bolinho de Camarão", "500g", 23.90, "Sim"),
-    ("Prontos para Fritar", "Bolinho de Carne Seca com Mandioca", "500g", 23.90, "Sim"),
-    ("Prontos para Fritar", "Bolinho de Costela", "500g", 23.90, "Sim"),
-    ("Prontos para Fritar", "Bolinho de Salmão", "300g", 25.00, "Sim"),
-    ("Prontos para Fritar", "Bolinho de Tilápia com Queijo", "500g", 23.90, "Sim"),
-    ("Prontos para Fritar", "Camarão Empanado com Requeijão", "650g", 40.00, "Sim"),
-    ("Prontos para Fritar", "Camarão Empanado", "400g", 43.00, "Sim"),
-    ("Prontos para Fritar", "Chips de Tilápia Empanado", "500g", 28.50, "Sim"),
-    ("Prontos para Fritar", "Espetinho de Tilápia com Bacon", "500g", 38.00, "Sim"),
-    ("Prontos para Fritar", "Espetinho de Tilápia com Provolone", "500g", 38.00, "Sim"),
-    ("Prontos para Fritar", "Filé de Porquinho Empanado", "500g", 30.00, "Sim"),
-    ("Prontos para Fritar", "Iscas de Pintado Empanado", "500g", 30.00, "Sim"),
-    ("Prontos para Fritar", "Lambari Desossado e Empanado", "330g", 25.50, "Sim"),
-    ("Prontos para Fritar", "Moldado de Tilápia Empanado", "700g", 22.00, "Sim"),
-    ("Prontos para Fritar", "Queijo Cura Empanado", "500g", 30.00, "Sim"),
-    ("Prontos para Fritar", "Tiras de Merluza Empanada", "500g", 28.00, "Sim"),
-    ("Prontos para Fritar", "Tirinhas de Pangasius Empanadas", "500g", 27.00, "Sim"),
-    ("Prontos para Fritar", "Tirinhas de Tilápia Empanadas", "500g", 33.00, "Sim"),
-    ("Prontos para Fritar", "Torresmo de Pacu Empanado", "500g", 32.00, "Sim"),
-    ("Diversos", "Anel de Lula", "500g", 36.00, "Sim"),
-    ("Diversos", "Caranguejo", "6 unidades", 55.00, "Sim"),
-    ("Diversos", "Farinha para Empanar", "400g", 14.00, "Sim"),
-    ("Diversos", "Kani Kama", "250g", 13.00, "Sim"),
-    ("Diversos", "Mandioca", "1kg", 10.00, "Sim"),
-    ("Diversos", "Mexilhão Desconchado", "500g", 31.50, "Sim"),
-    ("Diversos", "Sardinha Salgada", "400g", 18.00, "Sim"),
-    ("Diversos", "Siri", "1Kg", 57.00, "Sim"),
+    ("Filés", "Filé de Bacalhau", "kg", 57.00, "Sim", ""),
+    ("Filés", "Filé de Cavalinha", "500g", 15.00, "Sim", ""),
+    ("Filés", "Filé de Corvina", "500g", 19.00, "Sim", ""),
+    ("Filés", "Filé de Corvina", "1kg", 37.00, "Sim", ""),
+    ("Filés", "Filé de Merluza", "500g", 19.50, "Sim", ""),
+    ("Filés", "Filézinho de Pacu", "500g", 21.00, "Sim", ""),
+    ("Filés", "Filé de Pangasius", "1kg", 40.00, "Sim", ""),
+    ("Filés", "Filé de Pirarucu em Pedaços", "500g", 26.00, "Sim", ""),
+    ("Filés", "Filé de Porquinho", "500g", 21.00, "Sim", ""),
+    ("Filés", "Filé de Salmão", "kg", 99.99, "Sim", ""),
+    ("Filés", "Filé de Tilápia", "500g", 28.00, "Sim", ""),
+    ("Filés", "Filé de Tilápia", "1kg", 55.00, "Sim", ""),
+    ("Filés", "Filé de Tucunaré", "500g", 25.00, "Sim", ""),
+    ("Filés", "Filé de Trilha", "500g", 21.00, "Sim", ""),
+    ("Filés", "Filé de Uritinga (Pintado da Amazônia)", "1kg", 45.00, "Sim", ""),
+    ("Filés", "Sardinha Espalmada", "500g", 15.00, "Sim", ""),
+    ("Filés", "Traíra Espalmada Retalhada", "1kg", 36.00, "Sim", ""),
+    ("Postas", "Costelinha de Pacu", "500g", 21.00, "Sim", ""),
+    ("Postas", "Posta de Barbado", "500g", 16.50, "Sim", ""),
+    ("Postas", "Posta de Cascudo", "500g", 14.00, "Sim", ""),
+    ("Postas", "Posta de Cação", "Kg", 43.00, "Sim", ""),
+    ("Postas", "Posta de Tilápia", "1kg", 35.00, "Sim", ""),
+    ("Postas", "Posta de Pintado", "kg", 60.00, "Sim", ""),
+    ("Peixes Inteiros", "Pacu Dessosado", "kg", 47.00, "Sim", ""),
+    ("Peixes Inteiros", "Corvina (G)", "kg", 27.00, "Sim", ""),
+    ("Peixes Inteiros", "Curimba", "kg", 18.00, "Sim", ""),
+    ("Peixes Inteiros", "Lambari", "500g", 22.50, "Sim", ""),
+    ("Peixes Inteiros", "Mandi", "kg", 24.00, "Sim", ""),
+    ("Peixes Inteiros", "Manjubinha Eviscerada sem Cabeça", "500g", 20.00, "Sim", ""),
+    ("Peixes Inteiros", "Pacu / Tambaqui com Escamas", "kg", 32.00, "Sim", ""),
+    ("Peixes Inteiros", "Piapara", "kg", 25.00, "Sim", ""),
+    ("Peixes Inteiros", "Piau 3 Pintas", "kg", 15.00, "Sim", ""),
+    ("Peixes Inteiros", "Sardinha Inteira Eviscerada sem Cabeça", "500g", 12.50, "Sim", ""),
+    ("Peixes Inteiros", "Tainha", "kg", 27.00, "Sim", ""),
+    ("Peixes Inteiros", "Toquinho de Cascudo", "500g", 13.00, "Sim", ""),
+    ("Peixes Inteiros", "Tilápia Eviscerada com Escamas", "kg", 27.00, "Sim", ""),
+    ("Peixes Inteiros", "Tilápia Dessosada sem Escamas", "kg", 35.00, "Sim", ""),
+    ("Peixes Inteiros", "Traíra", "kg", 20.00, "Sim", ""),
+    ("Peixes Inteiros", "Traíra (G)", "kg", 27.00, "Sim", ""),
+    ("Peixes Inteiros", "Tucunaré (G)", "kg", 30.00, "Sim", ""),
+    ("Camarões", "Camarão (P)", "500g", 28.00, "Sim", ""),
+    ("Camarões", "Camarão (M)", "500g", 39.50, "Sim", ""),
+    ("Camarões", "Camarão (G)", "500g", 48.50, "Sim", ""),
+    ("Prontos para Fritar", "Bolinho de Bacalhau", "500g", 23.90, "Sim", ""),
+    ("Prontos para Fritar", "Bolinho de Bacalhau Gourmet", "500g", 30.00, "Sim", ""),
+    ("Prontos para Fritar", "Bolinho de Camarão", "500g", 23.90, "Sim", ""),
+    ("Prontos para Fritar", "Bolinho de Carne Seca com Mandioca", "500g", 23.90, "Sim", ""),
+    ("Prontos para Fritar", "Bolinho de Costela", "500g", 23.90, "Sim", ""),
+    ("Prontos para Fritar", "Bolinho de Salmão", "300g", 25.90, "Sim", ""),
+    ("Prontos para Fritar", "Bolinho de Tilápia com Queijo", "500g", 23.90, "Sim", ""),
+    ("Prontos para Fritar", "Camarão Empanado com Requeijão", "650g", 40.00, "Sim", ""),
+    ("Prontos para Fritar", "Camarão Empanado", "400g", 43.00, "Sim", ""),
+    ("Prontos para Fritar", "Chips de Tilápia Empanado", "500g", 28.50, "Sim", ""),
+    ("Prontos para Fritar", "Espetinho de Tilápia com Bacon", "500g", 38.00, "Sim", ""),
+    ("Prontos para Fritar", "Espetinho de Tilápia com Provolone", "500g", 38.00, "Sim", ""),
+    ("Prontos para Fritar", "Filé de Porquinho Empanado", "500g", 30.00, "Sim", ""),
+    ("Prontos para Fritar", "Iscas de Pintado Empanado", "500g", 33.00, "Sim", ""),
+    ("Prontos para Fritar", "Lambari Desossado e Empanado", "330g", 28.00, "Sim", ""),
+    ("Prontos para Fritar", "Moldado de Tilápia Empanado", "700g", 22.00, "Sim", ""),
+    ("Prontos para Fritar", "Queijo Cura Empanado", "500g", 30.00, "Sim", ""),
+    ("Prontos para Fritar", "Tiras de Merluza Empanada", "500g", 28.00, "Sim", ""),
+    ("Prontos para Fritar", "Tirinhas de Pangasius Empanadas", "500g", 30.00, "Sim", ""),
+    ("Prontos para Fritar", "Tirinhas de Tilápia Empanadas", "500g", 34.50, "Sim", ""),
+    ("Prontos para Fritar", "Torresmo de Pacu Empanado", "500g", 36.00, "Sim", ""),
+    ("Prontos para Fritar", "Iscas de Filé de Frango Empanado", "500g", 18.00, "Sim", ""),
+    ("Diversos", "Anel de Lula", "500g", 36.00, "Sim", ""),
+    ("Diversos", "Caranguejo", "6 unidades", 55.00, "Sim", ""),
+    ("Diversos", "Farinha para Empanar", "400g", 14.00, "Sim", ""),
+    ("Diversos", "Kani Kama", "250g", 13.00, "Sim", ""),
+    ("Diversos", "Mandioca", "1kg", 10.00, "Sim", ""),
+    ("Diversos", "Mexilhão Desconchado", "500g", 31.50, "Sim", ""),
+    ("Diversos", "Sardinha Salgada", "400g", 18.00, "Sim", ""),
+    ("Diversos", "Siri", "1Kg", 57.00, "Sim", ""),
 ]
 
 def eh_vendido_por_kg(peso_str):
@@ -341,7 +462,7 @@ def carregar_produtos():
         df = pd.read_csv(LINK_PLANILHA_CSV)
     else:
         if not os.path.exists(ARQUIVO_EXCEL_LOCAL):
-            df_novo = pd.DataFrame(DADOS_PADRAO, columns=["Categoria", "Produto", "Peso", "Preco", "Disponivel"])
+            df_novo = pd.DataFrame(DADOS_PADRAO, columns=["Categoria", "Produto", "Peso", "Preco", "Disponivel", "Imagem"])
             with pd.ExcelWriter(ARQUIVO_EXCEL_LOCAL, engine="openpyxl") as writer:
                 df_novo.to_excel(writer, sheet_name="Catalogo", index=False)
         df = pd.read_excel(ARQUIVO_EXCEL_LOCAL, sheet_name="Catalogo")
@@ -535,7 +656,7 @@ df_filtrado = df_filtrado.reset_index(drop=True)
 st.caption(f"Mostrando **{len(df_filtrado)}** produto(s) em **{st.session_state.categoria_ativa}**")
 
 # ==========================================
-# GRADE DE PRODUTOS (LIMPA E DIRETA)
+# GRADE DE PRODUTOS (COM SUPORTE A FOTOS)
 # ==========================================
 if df_filtrado.empty:
     st.warning("Nenhum produto encontrado. Tente buscar por outro nome ou clique em 'Todas'.")
@@ -551,12 +672,22 @@ else:
             label_preco = "Valor por kg (pesado na hora)" if por_kg else "Preço unitário"
             preco_exibicao = f"{preco_fmt}/kg" if por_kg else preco_fmt
 
+            foto_url = obter_foto_produto(row)
+            bloco_foto = ""
+            if foto_url:
+                bloco_foto = f"""
+                    <div class="product-photo-box">
+                        <img src="{foto_url}" class="product-photo-img" alt="{row['Produto']}" onerror="this.parentElement.style.display='none'">
+                    </div>
+                """
+
             st.markdown(f"""
                 <div class="product-card">
                     <div class="card-top-row">
                         <span class="cat-badge">{icone_cat} {row['Categoria']}</span>
                         <span class="weight-badge">{badge_peso}</span>
                     </div>
+                    {bloco_foto}
                     <div class="prod-name">{row['Produto']}</div>
                     <div class="price-row">
                         <span class="price-label">{label_preco}</span>
