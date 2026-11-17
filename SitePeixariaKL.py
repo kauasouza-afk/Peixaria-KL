@@ -203,6 +203,14 @@ st.markdown("""
         margin-bottom: 8px;
     }
     </style>
+    /* Força cor escura nos títulos e textos gerais para não sumirem no modo escuro */
+    .stApp h1, .stApp h2, .stApp h3, .stApp label, .stApp .stMarkdown p, .stApp [data-testid="stCaptionContainer"] {
+        color: #0f172a !important;
+    }
+    /* Mantém o texto branco dentro do banner principal, barra lateral e rodapé */
+    .hero-modern h1, .hero-modern p, .modern-footer h3, .modern-footer p, section[data-testid="stSidebar"] * {
+        color: #ffffff !important;
+    }
 """, unsafe_allow_html=True)
 
 ICONES_CATEGORIA = {
