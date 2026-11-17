@@ -627,6 +627,7 @@ with st.sidebar:
 # NAVEGAÇÃO POR CATEGORIAS E BUSCA
 # ==========================================
 st.markdown("### 🧭 Explore por Categoria")
+contagem_cats = df_produtos["Categoria"].value_counts().to_dict()
 categorias_disponiveis = ["Todas"] + list(df_produtos["Categoria"].unique())
 
 if "categoria_ativa" not in st.session_state:
@@ -635,8 +636,9 @@ if "categoria_ativa" not in st.session_state:
 cols_cat = st.columns(len(categorias_disponiveis))
 for i, cat in enumerate(categorias_disponiveis):
     icone = ICONES_CATEGORIA.get(cat, "🌊")
+    qtd_cat = len(df_produtos) if cat == "Todas" else contagem_cats.get(cat, 0)
     tipo_btn = "primary" if st.session_state.categoria_ativa == cat else "secondary"
-    if cols_cat[i].button(f"{icone} {cat}", key=f"cat_{cat}", type=tipo_btn, use_container_width=True):
+    if cols_cat[i].button(f"{icone} {cat} ({qtd_cat})", key=f"cat_{cat}", type=tipo_btn, use_container_width=True):
         st.session_state.categoria_ativa = cat
         st.rerun()
 
