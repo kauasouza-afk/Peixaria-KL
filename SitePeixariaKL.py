@@ -12,7 +12,7 @@ TELEFONE_EXIBICAO = "(16) 99717-9478"
 SLOGAN = "Peixes frescos, frutos do mar e porções selecionadas direto para sua mesa"
 HORARIO_ATENDIMENTO = "Seg a Sáb: 08h às 18h • Dom: 08h às 12h"
 CIDADE_REGIAO = "Matão e Região - SP"
-TAXA_ENTREGA_AVISO = "Consulte taxa de entrega pelo WhatsApp"
+TAXA_ENTREGA = 5.00
 LINK_PLANILHA_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwKMzUp8ebSHgcxYUFm1sRIHqYIFlcpdhdiVfBqhUrKbX8zPCuCnbmWLaChwrSEtjA84oAAn9Tmcur/pub?gid=372842900&single=true&output=csv"
 
 PASTA_ATUAL = os.path.dirname(os.path.abspath(__file__))
@@ -141,11 +141,11 @@ st.markdown(f"""
         font-weight: 600;
     }}
 
-    /* Card de Produto Moderno */
+    /* Card de Produto Moderno (Sem Imagens) */
     .product-card {{
         background: {bg_card};
         border-radius: 18px;
-        padding: 16px;
+        padding: 20px;
         border: 1px solid {border_card};
         box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -160,7 +160,7 @@ st.markdown(f"""
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 14px;
     }}
     .cat-badge {{
         background: {bg_cat_badge};
@@ -180,45 +180,24 @@ st.markdown(f"""
         border-radius: 8px;
         border: 1px solid {border_weight_badge};
     }}
-
-    /* Foto limpa, retangular e profissional do produto */
-    .product-photo-box {{
-        width: 100%;
-        height: 170px;
-        border-radius: 14px;
-        overflow: hidden;
-        margin-bottom: 12px;
-        background-color: #0f172a;
-    }}
-    .product-photo-img {{
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        transition: transform 0.3s ease;
-    }}
-    .product-card:hover .product-photo-img {{
-        transform: scale(1.05);
-    }}
-
     .prod-name {{
         color: {text_main};
-        font-size: 1.06rem;
+        font-size: 1.12rem;
         font-weight: 700;
         line-height: 1.35;
-        min-height: 44px;
-        margin: 4px 0 10px 0;
+        min-height: 48px;
+        margin: 6px 0 14px 0;
         text-align: left;
     }}
     .price-row {{
         display: flex;
         align-items: baseline;
         justify-content: space-between;
-        padding-top: 10px;
+        padding-top: 12px;
         border-top: 1px solid {border_divider};
     }}
     .price-label {{
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         color: {text_muted};
         font-weight: 500;
     }}
@@ -276,105 +255,6 @@ ICONES_CATEGORIA = {
     "Prontos para Fritar": "🍤",
     "Diversos": "🦀",
 }
-
-# ==========================================
-# FOTOS LIMPA E ESPECÍFICA DE CADA PRODUTO
-# ==========================================
-FOTO_PADRAO = "https://images.unsplash.com/photo-1534943441045-1009d7cb0bb9?auto=format&fit=crop&w=600&q=80"
-
-FOTOS_ESPECIFICAS = {
-    # --- FILÉS ---
-    "Filé de Bacalhau": "https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?auto=format&fit=crop&w=600&q=80",
-    "Filé de Cavalinha": "https://images.unsplash.com/photo-1510130387422-82bed34b37e9?auto=format&fit=crop&w=600&q=80",
-    "Filé de Corvina": "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=600&q=80",
-    "Filé de Merluza": "https://images.unsplash.com/photo-1534943441045-1009d7cb0bb9?auto=format&fit=crop&w=600&q=80",
-    "Filézinho de Pacu": "https://images.unsplash.com/photo-1553659971-f01207815844?auto=format&fit=crop&w=600&q=80",
-    "Filé de Pangasius": "https://images.unsplash.com/photo-1534943441045-1009d7cb0bb9?auto=format&fit=crop&w=600&q=80",
-    "Filé de Pirarucu em Pedaços": "https://images.unsplash.com/photo-1535140728325-a4d3707eee61?auto=format&fit=crop&w=600&q=80",
-    "Filé de Porquinho": "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=600&q=80",
-    "Filé de Salmão": "https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?auto=format&fit=crop&w=600&q=80",
-    "Filé de Tilápia": "https://images.unsplash.com/photo-1534943441045-1009d7cb0bb9?auto=format&fit=crop&w=600&q=80",
-    "Filé de Tucunaré": "https://images.unsplash.com/photo-1510130387422-82bed34b37e9?auto=format&fit=crop&w=600&q=80",
-    "Filé de Trilha": "https://images.unsplash.com/photo-1553659971-f01207815844?auto=format&fit=crop&w=600&q=80",
-    "Filé de Uritinga (Pintado da Amazônia)": "https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?auto=format&fit=crop&w=600&q=80",
-    "Sardinha Espalmada": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=600&q=80",
-    "Traíra Espalmada Retalhada": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=600&q=80",
-
-    # --- POSTAS ---
-    "Costelinha de Pacu": "https://images.unsplash.com/photo-1535140728325-a4d3707eee61?auto=format&fit=crop&w=600&q=80",
-    "Posta de Barbado": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80",
-    "Posta de Cascudo": "https://images.unsplash.com/photo-1535140728325-a4d3707eee61?auto=format&fit=crop&w=600&q=80",
-    "Posta de Cação": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80",
-    "Posta de Tilápia": "https://images.unsplash.com/photo-1535140728325-a4d3707eee61?auto=format&fit=crop&w=600&q=80",
-    "Posta de Pintado": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80",
-
-    # --- PEIXES INTEIROS ---
-    "Cavalinha Inteira": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80",
-    "Corvina (G)": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=600&q=80",
-    "Curimba": "https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?auto=format&fit=crop&w=600&q=80",
-    "Lambari": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=600&q=80",
-    "Mandi": "https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=600&q=80",
-    "Manjubinha Eviscerada sem Cabeça": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=600&q=80",
-    "Pacu / Tambaqui com Escamas": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=600&q=80",
-    "Piapara": "https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?auto=format&fit=crop&w=600&q=80",
-    "Piau 3 Pintas": "https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=600&q=80",
-    "Sardinha Inteira Eviscerada sem Cabeça": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=600&q=80",
-    "Tainha": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80",
-    "Toquinho de Cascudo": "https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=600&q=80",
-    "Tilápia Eviscerada com Escamas": "https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?auto=format&fit=crop&w=600&q=80",
-    "Tilápia Eviscerada sem Escamas": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=600&q=80",
-    "Traíra": "https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=600&q=80",
-    "Traíra (G)": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80",
-    "Tucunaré (G)": "https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?auto=format&fit=crop&w=600&q=80",
-
-    # --- CAMARÕES ---
-    "Camarão (P)": "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=600&q=80",
-    "Camarão (M)": "https://images.unsplash.com/photo-1625943553852-781c6dd46faa?auto=format&fit=crop&w=600&q=80",
-    "Camarão (G)": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=600&q=80",
-
-    # --- PRONTOS PARA FRITAR ---
-    "Bolinho de Bacalhau": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80",
-    "Bolinho de Bacalhau Gourmet": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80",
-    "Bolinho de Camarão": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=600&q=80",
-    "Bolinho de Carne Seca com Mandioca": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80",
-    "Bolinho de Costela": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80",
-    "Bolinho de Salmão": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80",
-    "Bolinho de Tilápia com Queijo": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80",
-    "Camarão Empanado com Requeijão": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=600&q=80",
-    "Camarão Empanado": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=600&q=80",
-    "Chips de Tilápia Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=600&q=80",
-    "Espetinho de Tilápia com Bacon": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80",
-    "Espetinho de Tilápia com Provolone": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80",
-    "Filé de Porquinho Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=600&q=80",
-    "Iscas de Pintado Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=600&q=80",
-    "Lambari Desossado e Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=600&q=80",
-    "Moldado de Tilápia Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=600&q=80",
-    "Queijo Cura Empanado": "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=600&q=80",
-    "Tiras de Merluza Empanada": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=600&q=80",
-    "Tirinhas de Pangasius Empanadas": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=600&q=80",
-    "Tirinhas de Tilápia Empanadas": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=600&q=80",
-    "Torresmo de Pacu Empanado": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=600&q=80",
-
-    # --- DIVERSOS ---
-    "Anel de Lula": "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=600&q=80",
-    "Caranguejo": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=600&q=80",
-    "Farinha para Empanar": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80",
-    "Kani Kama": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80",
-    "Mandioca": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80",
-    "Mexilhão Desconchado": "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=600&q=80",
-    "Sardinha Salgada": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=600&q=80",
-    "Siri": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=600&q=80",
-}
-
-def obter_foto_produto(row):
-    # 1. Se você colocar o link na coluna 'Imagem' da planilha do Google, ela tem prioridade:
-    img_planilha = str(row.get("Imagem", "")).strip()
-    if img_planilha and img_planilha.lower() != "nan":
-        return img_planilha
-
-    # 2. Busca exata pelo nome do produto:
-    nome_produto = str(row.get("Produto", "")).strip()
-    return FOTOS_ESPECIFICAS.get(nome_produto, FOTO_PADRAO)
 
 DADOS_PADRAO = [
     ("Filés", "Filé de Bacalhau", "kg", 57.00, "Sim"),
@@ -450,6 +330,10 @@ DADOS_PADRAO = [
     ("Diversos", "Sardinha Salgada", "400g", 18.00, "Sim"),
     ("Diversos", "Siri", "1Kg", 57.00, "Sim"),
 ]
+
+def eh_vendido_por_kg(peso_str):
+    # Identifica quando a unidade é por quilo variável (ex: "kg" ou "Kg"), diferente de pacote fechado "1kg"
+    return str(peso_str).strip().lower() == "kg"
 
 @st.cache_data(ttl=60)
 def carregar_produtos():
@@ -529,14 +413,19 @@ with st.sidebar:
     if not st.session_state.carrinho:
         st.info("Seu carrinho está vazio.\n\nEscolha os itens no catálogo ao lado e clique em **Adicionar**.")
     else:
-        total = 0.0
-        linhas_zap = [f"Olá, *{NOME_LOJA}*! Gostaria de fazer o seguinte pedido:\n"]
+        subtotal_produtos = 0.0
+        tem_item_kg = False
+        linhas_itens_zap = []
 
         for chave, item in list(st.session_state.carrinho.items()):
             subtotal = item["preco"] * item["qtd"]
-            total += subtotal
+            subtotal_produtos += subtotal
+            por_kg = eh_vendido_por_kg(item["peso"])
+            if por_kg:
+                tem_item_kg = True
 
-            st.markdown(f"**{item['produto']}** • `{item['peso']}`")
+            etiqueta_peso = f"{item['peso']} • ⚖️ A pesar" if por_kg else item["peso"]
+            st.markdown(f"**{item['produto']}** • `{etiqueta_peso}`")
             b1, b2, b3, b4 = st.columns([1, 1, 1, 2])
             if b1.button("➖", key=f"menos_{chave}"):
                 if item["qtd"] > 1:
@@ -551,21 +440,52 @@ with st.sidebar:
             b4.markdown(f"**R$ {subtotal:,.2f}**".replace(".", ","))
             st.divider()
 
-            linhas_zap.append(f"• {item['qtd']}x {item['produto']} ({item['peso']}) - R$ {subtotal:,.2f}".replace(".", ","))
+            if por_kg:
+                linhas_itens_zap.append(
+                    f"• {item['qtd']} unid./peça(s) de {item['produto']} (R$ {item['preco']:,.2f}/kg — *pesar na balança*)".replace(".", ",")
+                )
+            else:
+                linhas_itens_zap.append(
+                    f"• {item['qtd']}x {item['produto']} ({item['peso']}) — R$ {subtotal:,.2f}".replace(".", ",")
+                )
 
-        st.markdown(f"### Total: R$ {total:,.2f}".replace(".", ","))
-        st.caption(f"ℹ️ {TAXA_ENTREGA_AVISO}")
+        if tem_item_kg:
+            st.warning("⚖️ **Itens por kg:** O peso exato será conferido na balança e o valor final será enviado pelo WhatsApp.")
 
-        tipo_entrega = st.radio("Recebimento:", ["🚚 Entrega (Delivery)", "🏪 Retirar na Loja"])
+        tipo_entrega = st.radio("Modo de recebimento:", ["🚚 Entrega (Delivery)", "🏪 Retirar na Loja"])
+        eh_entrega = "Entrega" in tipo_entrega
+        valor_entrega = TAXA_ENTREGA if eh_entrega else 0.0
+        total_final = subtotal_produtos + valor_entrega
+
+        # Resumo organizado de valores na barra lateral
+        st.markdown("---")
+        label_subtotal = "Subtotal estimado:" if tem_item_kg else "Subtotal dos itens:"
+        label_total = "Total estimado:" if tem_item_kg else "Total:"
+        st.markdown(f"**{label_subtotal}** R$ {subtotal_produtos:,.2f}".replace(".", ","))
+        if eh_entrega:
+            st.markdown(f"**Taxa de entrega:** + R$ {valor_entrega:,.2f}".replace(".", ","))
+        else:
+            st.markdown("**Taxa de entrega:** Grátis (Retirada)")
+        st.markdown(f"### {label_total} R$ {total_final:,.2f}".replace(".", ","))
+        st.markdown("---")
+
         nome_cliente = st.text_input("Seu nome:", placeholder="Ex: Maria Oliveira")
         endereco = ""
-        if "Entrega" in tipo_entrega:
+        if eh_entrega:
             endereco = st.text_input("Endereço de entrega:", placeholder="Rua, número, bairro...")
         forma_pagamento = st.selectbox("Pagamento:", ["Pix", "Cartão (Crédito/Débito)", "Dinheiro"])
-        observacoes = st.text_input("Observações:", placeholder="Ex: Limpo em postas, troco para R$ 100...")
+        observacoes = st.text_input("Observações:", placeholder="Ex: Peixe de aprox. 2kg, limpo em postas...")
 
-        linhas_zap.append(f"\n*Total estimado: R$ {total:,.2f}*".replace(".", ","))
-        linhas_zap.append(f"*Recebimento:* {tipo_entrega}")
+        # Mensagem organizada para o WhatsApp
+        linhas_zap = [f"Olá, *{NOME_LOJA}*! Gostaria de fazer o seguinte pedido:\n"]
+        linhas_zap.extend(linhas_itens_zap)
+        if tem_item_kg:
+            linhas_zap.append("\n⚖️ _Pedido contém item(ns) por kg: favor confirmar o peso e o valor exato na balança._")
+        linhas_zap.append(f"\n*{label_subtotal}* R$ {subtotal_produtos:,.2f}".replace(".", ","))
+        if eh_entrega:
+            linhas_zap.append(f"*Taxa de entrega:* R$ {valor_entrega:,.2f}".replace(".", ","))
+        linhas_zap.append(f"*{label_total} R$ {total_final:,.2f}*".replace(".", ","))
+        linhas_zap.append(f"\n*Recebimento:* {tipo_entrega}")
         if nome_cliente.strip():
             linhas_zap.append(f"*Cliente:* {nome_cliente.strip()}")
         if endereco.strip():
@@ -612,7 +532,7 @@ df_filtrado = df_filtrado.reset_index(drop=True)
 st.caption(f"Mostrando **{len(df_filtrado)}** produto(s) em **{st.session_state.categoria_ativa}**")
 
 # ==========================================
-# GRADE DE PRODUTOS (ORDEM EXATA)
+# GRADE DE PRODUTOS (LIMPA E DIRETA)
 # ==========================================
 if df_filtrado.empty:
     st.warning("Nenhum produto encontrado. Tente buscar por outro nome ou clique em 'Todas'.")
@@ -623,21 +543,21 @@ else:
         with coluna:
             icone_cat = ICONES_CATEGORIA.get(row["Categoria"], "🐟")
             preco_fmt = f"R$ {row['Preco']:,.2f}".replace(".", ",")
-            foto_url = obter_foto_produto(row)
+            por_kg = eh_vendido_por_kg(row["Peso"])
+            badge_peso = "⚖️ Por kg" if por_kg else f"📦 {row['Peso']}"
+            label_preco = "Valor por kg (pesado na hora)" if por_kg else "Preço unitário"
+            preco_exibicao = f"{preco_fmt}/kg" if por_kg else preco_fmt
 
             st.markdown(f"""
                 <div class="product-card">
                     <div class="card-top-row">
                         <span class="cat-badge">{icone_cat} {row['Categoria']}</span>
-                        <span class="weight-badge">📦 {row['Peso']}</span>
-                    </div>
-                    <div class="product-photo-box">
-                        <img src="{foto_url}" class="product-photo-img" alt="{row['Produto']}" onerror="this.src='{FOTO_PADRAO}'">
+                        <span class="weight-badge">{badge_peso}</span>
                     </div>
                     <div class="prod-name">{row['Produto']}</div>
                     <div class="price-row">
-                        <span class="price-label">Preço unitário</span>
-                        <span class="price-number">{preco_fmt}</span>
+                        <span class="price-label">{label_preco}</span>
+                        <span class="price-number">{preco_exibicao}</span>
                     </div>
                 </div>
             """, unsafe_allow_html=True)
@@ -665,7 +585,7 @@ st.markdown(f"""
         <p style="margin:4px 0; color:#e2e8f0;">{HORARIO_ATENDIMENTO}</p>
         <p style="margin:4px 0; color:#7dd3fc;">📍 {CIDADE_REGIAO} • 📱 WhatsApp: <b>{TELEFONE_EXIBICAO}</b></p>
         <p style="margin-top:14px; font-size:0.78rem; color:#94a3b8;">
-            * Imagens e valores meramente ilustrativos, sujeitos à disponibilidade de estoque.
+            * Valores sujeitos à disponibilidade de estoque. Itens por kg são pesados na balança e confirmados pelo WhatsApp. Taxa de entrega: R$ {TAXA_ENTREGA:,.2f}.
         </p>
     </div>
 """, unsafe_allow_html=True)
