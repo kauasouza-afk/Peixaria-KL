@@ -14,8 +14,6 @@ HORARIO_ATENDIMENTO = "Seg a Sáb: 08h às 18h • Dom: 08h às 12h"
 CIDADE_REGIAO = "Matão e Região - SP"
 TAXA_ENTREGA_AVISO = "Consulte taxa de entrega pelo WhatsApp"
 LINK_PLANILHA_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwKMzUp8ebSHgcxYUFm1sRIHqYIFlcpdhdiVfBqhUrKbX8zPCuCnbmWLaChwrSEtjA84oAAn9Tmcur/pub?gid=372842900&single=true&output=csv"
-# Se usar Google Sheets publicado como CSV, cole o link entre as aspas abaixo:
-LINK_PLANILHA_CSV = ""
 
 PASTA_ATUAL = os.path.dirname(os.path.abspath(__file__))
 ARQUIVO_EXCEL_LOCAL = os.path.join(PASTA_ATUAL, "Catalogo_Peixaria_KL.xlsx")
@@ -73,7 +71,7 @@ st.markdown("""
         margin-bottom: 12px;
     }
     .hero-modern h1 {
-        color: #ffffff;
+        color: #ffffff !important;
         margin: 0;
         font-size: 2.9rem;
         font-weight: 800;
@@ -89,7 +87,7 @@ st.markdown("""
         margin: 12px auto 22px auto;
         max-width: 650px;
         font-size: 1.05rem;
-        color: #e0f2fe;
+        color: #e0f2fe !important;
         font-weight: 400;
     }
     .hero-features {
@@ -104,7 +102,7 @@ st.markdown("""
         padding: 7px 15px;
         border-radius: 12px;
         font-size: 0.84rem;
-        color: #f0f9ff;
+        color: #f0f9ff !important;
         font-weight: 600;
     }
 
@@ -147,13 +145,44 @@ st.markdown("""
         border-radius: 8px;
         border: 1px solid #e2e8f0;
     }
+
+    /* Silhueta ilustrada em formato de peixe */
+    .fish-badge-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 10px 0 12px 0;
+        filter: drop-shadow(0 4px 8px rgba(2, 132, 199, 0.2));
+    }
+    .fish-shape-art {
+        width: 175px;
+        height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-left: 16px;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.4px;
+        clip-path: polygon(
+            0% 18%, 18% 42%, 35% 15%, 65% 8%, 88% 25%, 100% 50%, 
+            88% 75%, 65% 92%, 35% 85%, 18% 58%, 0% 82%, 8% 50%
+        );
+        transition: transform 0.25s ease;
+    }
+    .product-card:hover .fish-shape-art {
+        transform: scale(1.05);
+    }
+
     .prod-name {
         color: #0f172a;
         font-size: 1.08rem;
         font-weight: 700;
         line-height: 1.35;
         min-height: 46px;
-        margin: 6px 0 14px 0;
+        margin: 6px 0 12px 0;
+        text-align: center;
     }
     .price-row {
         display: flex;
@@ -198,11 +227,11 @@ st.markdown("""
         box-shadow: 0 -4px 20px rgba(8, 27, 51, 0.08);
     }
     .modern-footer h3 {
-        color: #ffffff;
+        color: #ffffff !important;
         font-weight: 800;
         margin-bottom: 8px;
     }
-    </style>
+
     /* Força cor escura nos títulos e textos gerais para não sumirem no modo escuro */
     .stApp h1, .stApp h2, .stApp h3, .stApp label, .stApp .stMarkdown p, .stApp [data-testid="stCaptionContainer"] {
         color: #0f172a !important;
@@ -211,6 +240,7 @@ st.markdown("""
     .hero-modern h1, .hero-modern p, .modern-footer h3, .modern-footer p, section[data-testid="stSidebar"] * {
         color: #ffffff !important;
     }
+    </style>
 """, unsafe_allow_html=True)
 
 ICONES_CATEGORIA = {
@@ -463,11 +493,28 @@ else:
         with coluna:
             icone_cat = ICONES_CATEGORIA.get(row["Categoria"], "🐟")
             preco_fmt = f"R$ {row['Preco']:,.2f}".replace(".", ",")
+            
+            cat_lower = str(row.get("Categoria", "")).lower()
+            prod_lower = str(row.get("Produto", "")).lower()
+            if "salm" in prod_lower or "posta" in cat_lower:
+                cor_peixe = "linear-gradient(135deg, #f97316, #ea580c)"
+            elif "camar" in cat_lower or "camar" in prod_lower:
+                cor_peixe = "linear-gradient(135deg, #ec4899, #db2777)"
+            elif "pronto" in cat_lower:
+                cor_peixe = "linear-gradient(135deg, #eab308, #ca8a04)"
+            else:
+                cor_peixe = "linear-gradient(135deg, #0284c7, #0369a1)"
+
             st.markdown(f"""
                 <div class="product-card">
                     <div class="card-top-row">
                         <span class="cat-badge">{icone_cat} {row['Categoria']}</span>
                         <span class="weight-badge">📦 {row['Peso']}</span>
+                    </div>
+                    <div class="fish-badge-wrapper">
+                        <div class="fish-shape-art" style="background: {cor_peixe};">
+                            {icone_cat} {row['Peso']}
+                        </div>
                     </div>
                     <div class="prod-name">{row['Produto']}</div>
                     <div class="price-row">
