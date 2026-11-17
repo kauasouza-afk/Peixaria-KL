@@ -14,10 +14,10 @@ HORARIO_ATENDIMENTO = "Seg a Sáb: 08h às 18h • Dom: 08h às 12h"
 ENDERECO_LOJA = "Rua Sérgio Felício de Souza, 995 - Quarto Centenário, Matão - SP"
 CIDADE_REGIAO = "Matão e Região - SP"
 TAXA_ENTREGA = 5.00
-LINK_PLANILHA_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwKMzUp8ebSHgcxYUFm1sRIHqYIFlcpdhdiVfBqhUrKbX8zPCuCnbmWLaChwrSEtjA84oAAn9Tmcur/pub?gid=372842900&single=true&output=csv"
+LINK_PLANILHA_CSV = ""
 
 PASTA_ATUAL = os.path.dirname(os.path.abspath(__file__))
-ARQUIVO_EXCEL_LOCAL = os.path.join(PASTA_ATUAL, "Catalogo_Peixaria_KL.xlsx")
+ARQUIVO_EXCEL_LOCAL = os.path.join(PASTA_ATUAL, "Peixaria KL.xlsx")
 
 st.set_page_config(
     page_title=f"{NOME_LOJA} | Catálogo Digital",
@@ -280,7 +280,7 @@ ICONES_CATEGORIA = {
 
 # ==========================================
 # FOTOS ESPECÍFICAS POR PRODUTO EXATO
-# (Cole o link direto da foto entre as aspas OU preencha a coluna 'Imagem' na planilha do Google)
+# (Cole o link direto da foto entre as aspas OU preencha a coluna 'Imagem' na planilha)
 # ==========================================
 FOTOS_ESPECIFICAS = {
     # --- FILÉS ---
@@ -368,7 +368,7 @@ FOTOS_ESPECIFICAS = {
 }
 
 def obter_foto_produto(row):
-    # 1. Prioridade máxima: link preenchido na coluna 'Imagem' da sua planilha do Google
+    # 1. Prioridade máxima: link preenchido na coluna 'Imagem' da planilha
     img_planilha = str(row.get("Imagem", "")).strip()
     if img_planilha and img_planilha.lower() not in ["nan", "none", ""]:
         return img_planilha
@@ -465,7 +465,7 @@ def carregar_produtos():
             df_novo = pd.DataFrame(DADOS_PADRAO, columns=["Categoria", "Produto", "Peso", "Preco", "Disponivel", "Imagem"])
             with pd.ExcelWriter(ARQUIVO_EXCEL_LOCAL, engine="openpyxl") as writer:
                 df_novo.to_excel(writer, sheet_name="Catalogo", index=False)
-        df = pd.read_excel(ARQUIVO_EXCEL_LOCAL, sheet_name="Catalogo")
+        df = pd.read_excel(ARQUIVO_EXCEL_LOCAL, sheet_name=0)
 
     df.columns = [c.strip() for c in df.columns]
     if "Disponivel" in df.columns:
