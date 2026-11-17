@@ -11,6 +11,7 @@ WHATSAPP = "5516997179478"
 TELEFONE_EXIBICAO = "(16) 99717-9478"
 SLOGAN = "Peixes frescos, frutos do mar e porções selecionadas direto para sua mesa"
 HORARIO_ATENDIMENTO = "Seg a Sáb: 08h às 18h • Dom: 08h às 12h"
+ENDERECO_LOJA = "Rua Sérgio Felício de Souza, 995 - Quarto Centenário, Matão - SP"
 CIDADE_REGIAO = "Matão e Região - SP"
 TAXA_ENTREGA = 5.00
 LINK_PLANILHA_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwKMzUp8ebSHgcxYUFm1sRIHqYIFlcpdhdiVfBqhUrKbX8zPCuCnbmWLaChwrSEtjA84oAAn9Tmcur/pub?gid=372842900&single=true&output=csv"
@@ -332,7 +333,6 @@ DADOS_PADRAO = [
 ]
 
 def eh_vendido_por_kg(peso_str):
-    # Identifica quando a unidade é por quilo variável (ex: "kg" ou "Kg"), diferente de pacote fechado "1kg"
     return str(peso_str).strip().lower() == "kg"
 
 @st.cache_data(ttl=60)
@@ -376,7 +376,7 @@ st.markdown(f"""
         <div class="hero-features">
             <span class="feature-chip">❄️ Frescor Garantido</span>
             <span class="feature-chip">⚡ Pedido Rápido no WhatsApp</span>
-            <span class="feature-chip">📍 {CIDADE_REGIAO}</span>
+            <span class="feature-chip">📍 {ENDERECO_LOJA}</span>
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -466,6 +466,7 @@ with st.sidebar:
             st.markdown(f"**Taxa de entrega:** + R$ {valor_entrega:,.2f}".replace(".", ","))
         else:
             st.markdown("**Taxa de entrega:** Grátis (Retirada)")
+            st.info(f"📍 **Retirada em:**\n{ENDERECO_LOJA}")
         st.markdown(f"### {label_total} R$ {total_final:,.2f}".replace(".", ","))
         st.markdown("---")
 
@@ -486,6 +487,8 @@ with st.sidebar:
             linhas_zap.append(f"*Taxa de entrega:* R$ {valor_entrega:,.2f}".replace(".", ","))
         linhas_zap.append(f"*{label_total} R$ {total_final:,.2f}*".replace(".", ","))
         linhas_zap.append(f"\n*Recebimento:* {tipo_entrega}")
+        if not eh_entrega:
+            linhas_zap.append(f"*Local de retirada:* {ENDERECO_LOJA}")
         if nome_cliente.strip():
             linhas_zap.append(f"*Cliente:* {nome_cliente.strip()}")
         if endereco.strip():
@@ -582,8 +585,9 @@ else:
 st.markdown(f"""
     <div class="modern-footer">
         <h3>🐟 {NOME_LOJA}</h3>
-        <p style="margin:4px 0; color:#e2e8f0;">{HORARIO_ATENDIMENTO}</p>
-        <p style="margin:4px 0; color:#7dd3fc;">📍 {CIDADE_REGIAO} • 📱 WhatsApp: <b>{TELEFONE_EXIBICAO}</b></p>
+        <p style="margin:4px 0; color:#e2e8f0;">📍 {ENDERECO_LOJA}</p>
+        <p style="margin:4px 0; color:#e2e8f0;">🕒 {HORARIO_ATENDIMENTO}</p>
+        <p style="margin:4px 0; color:#7dd3fc;">🚚 {CIDADE_REGIAO} • 📱 WhatsApp: <b>{TELEFONE_EXIBICAO}</b></p>
         <p style="margin-top:14px; font-size:0.78rem; color:#94a3b8;">
             * Valores sujeitos à disponibilidade de estoque. Itens por kg são pesados na balança e confirmados pelo WhatsApp. Taxa de entrega: R$ {TAXA_ENTREGA:,.2f}.
         </p>
