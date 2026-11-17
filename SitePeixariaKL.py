@@ -25,27 +25,62 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+if "modo_escuro" not in st.session_state:
+    st.session_state.modo_escuro = False
+
+# ==========================================
+# PALETA DINÂMICA (CLARO / ESCURO)
+# ==========================================
+if st.session_state.modo_escuro:
+    bg_app = "linear-gradient(180deg, #091326 0%, #0f172a 50%, #020617 100%)"
+    bg_card = "#1e293b"
+    border_card = "#334155"
+    text_main = "#f8fafc"
+    text_muted = "#94a3b8"
+    price_color = "#38bdf8"
+    bg_cat_badge = "#0c4a6e"
+    text_cat_badge = "#7dd3fc"
+    border_cat_badge = "#0369a1"
+    bg_weight_badge = "#0f172a"
+    text_weight_badge = "#cbd5e1"
+    border_weight_badge = "#334155"
+    border_divider = "#334155"
+else:
+    bg_app = "linear-gradient(180deg, #eef6fc 0%, #f8fafc 40%, #f1f5f9 100%)"
+    bg_card = "#ffffff"
+    border_card = "#e2e8f0"
+    text_main = "#0f172a"
+    text_muted = "#64748b"
+    price_color = "#0369a1"
+    bg_cat_badge = "#f0f9ff"
+    text_cat_badge = "#0284c7"
+    border_cat_badge = "#bae6fd"
+    bg_weight_badge = "#f8fafc"
+    text_weight_badge = "#475569"
+    border_weight_badge = "#e2e8f0"
+    border_divider = "#f1f5f9"
+
 # ==========================================
 # DESIGN MODERNO (CSS CUSTOMIZADO)
 # ==========================================
-st.markdown("""
+st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-    html, body, [class*="css"] {
+    html, body, [class*="css"] {{
         font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .stApp {
-        background: linear-gradient(180deg, #eef6fc 0%, #f8fafc 40%, #f1f5f9 100%);
-    }
+    }}
+    .stApp {{
+        background: {bg_app};
+    }}
 
-    /* Esconde menu padrão superior do Streamlit para visual de site real */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header[data-testid="stHeader"] {background: transparent;}
+    /* Esconde menu padrão superior do Streamlit */
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
+    header[data-testid="stHeader"] {{background: transparent;}}
 
     /* Banner Hero Moderno */
-    .hero-modern {
+    .hero-modern {{
         background: radial-gradient(circle at top right, #0ea5e9 0%, #0369a1 35%, #081b33 100%);
         padding: 38px 28px;
         border-radius: 24px;
@@ -55,8 +90,8 @@ st.markdown("""
         margin-bottom: 24px;
         position: relative;
         overflow: hidden;
-    }
-    .hero-pill {
+    }}
+    .hero-pill {{
         display: inline-block;
         background: rgba(255, 255, 255, 0.14);
         backdrop-filter: blur(8px);
@@ -69,34 +104,34 @@ st.markdown("""
         padding: 6px 16px;
         border-radius: 999px;
         margin-bottom: 12px;
-    }
-    .hero-modern h1 {
+    }}
+    .stApp .hero-modern h1 {{
         color: #ffffff !important;
         margin: 0;
         font-size: 2.9rem;
         font-weight: 800;
         letter-spacing: -1px;
         line-height: 1.1;
-    }
-    .hero-modern h1 span {
+    }}
+    .stApp .hero-modern h1 span {{
         background: linear-gradient(90deg, #38bdf8, #67e8f9);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-    }
-    .hero-modern p {
+    }}
+    .stApp .hero-modern p {{
         margin: 12px auto 22px auto;
         max-width: 650px;
         font-size: 1.05rem;
         color: #e0f2fe !important;
         font-weight: 400;
-    }
-    .hero-features {
+    }}
+    .hero-features {{
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
         gap: 10px;
-    }
-    .feature-chip {
+    }}
+    .feature-chip {{
         background: rgba(8, 27, 51, 0.45);
         border: 1px solid rgba(125, 211, 252, 0.3);
         padding: 7px 15px;
@@ -104,57 +139,57 @@ st.markdown("""
         font-size: 0.84rem;
         color: #f0f9ff !important;
         font-weight: 600;
-    }
+    }}
 
     /* Card de Produto Moderno */
-    .product-card {
-        background: #ffffff;
+    .product-card {{
+        background: {bg_card};
         border-radius: 18px;
         padding: 20px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        border: 1px solid {border_card};
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         margin-bottom: 10px;
-    }
-    .product-card:hover {
+    }}
+    .product-card:hover {{
         transform: translateY(-4px);
-        box-shadow: 0 14px 28px -8px rgba(2, 132, 199, 0.18);
-        border-color: #7dd3fc;
-    }
-    .card-top-row {
+        box-shadow: 0 14px 28px -8px rgba(2, 132, 199, 0.25);
+        border-color: #38bdf8;
+    }}
+    .card-top-row {{
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 10px;
-    }
-    .cat-badge {
-        background: #f0f9ff;
-        color: #0284c7;
+    }}
+    .cat-badge {{
+        background: {bg_cat_badge};
+        color: {text_cat_badge};
         font-size: 0.74rem;
         font-weight: 700;
         padding: 4px 11px;
         border-radius: 999px;
-        border: 1px solid #bae6fd;
-    }
-    .weight-badge {
-        background: #f8fafc;
-        color: #475569;
+        border: 1px solid {border_cat_badge};
+    }}
+    .weight-badge {{
+        background: {bg_weight_badge};
+        color: {text_weight_badge};
         font-size: 0.76rem;
         font-weight: 700;
         padding: 4px 10px;
         border-radius: 8px;
-        border: 1px solid #e2e8f0;
-    }
+        border: 1px solid {border_weight_badge};
+    }}
 
     /* Silhueta ilustrada em formato de peixe */
-    .fish-badge-wrapper {
+    .fish-badge-wrapper {{
         display: flex;
         justify-content: center;
         align-items: center;
         margin: 10px 0 12px 0;
-        filter: drop-shadow(0 4px 8px rgba(2, 132, 199, 0.2));
-    }
-    .fish-shape-art {
+        filter: drop-shadow(0 4px 8px rgba(2, 132, 199, 0.25));
+    }}
+    .fish-shape-art {{
         width: 175px;
         height: 76px;
         display: flex;
@@ -170,54 +205,54 @@ st.markdown("""
             88% 75%, 65% 92%, 35% 85%, 18% 58%, 0% 82%, 8% 50%
         );
         transition: transform 0.25s ease;
-    }
-    .product-card:hover .fish-shape-art {
+    }}
+    .product-card:hover .fish-shape-art {{
         transform: scale(1.05);
-    }
+    }}
 
-    .prod-name {
-        color: #0f172a;
+    .prod-name {{
+        color: {text_main};
         font-size: 1.08rem;
         font-weight: 700;
         line-height: 1.35;
         min-height: 46px;
         margin: 6px 0 12px 0;
         text-align: center;
-    }
-    .price-row {
+    }}
+    .price-row {{
         display: flex;
         align-items: baseline;
         justify-content: space-between;
         padding-top: 12px;
-        border-top: 1px solid #f1f5f9;
-    }
-    .price-label {
+        border-top: 1px solid {border_divider};
+    }}
+    .price-label {{
         font-size: 0.8rem;
-        color: #64748b;
+        color: {text_muted};
         font-weight: 500;
-    }
-    .price-number {
+    }}
+    .price-number {{
         font-size: 1.48rem;
         font-weight: 800;
-        color: #0369a1;
+        color: {price_color};
         letter-spacing: -0.5px;
-    }
+    }}
 
     /* Botões Streamlit Estilizados */
-    div.stButton > button {
+    div.stButton > button {{
         border-radius: 12px;
         font-weight: 600;
         transition: all 0.2s ease;
-    }
-    div.stButton > button[kind="primary"] {
+    }}
+    div.stButton > button[kind="primary"] {{
         background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
         border: none;
         color: white;
         box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
-    }
+    }}
 
     /* Rodapé Moderno */
-    .modern-footer {
+    .modern-footer {{
         background: #081b33;
         color: #cbd5e1;
         padding: 34px 24px;
@@ -225,21 +260,20 @@ st.markdown("""
         text-align: center;
         margin-top: 48px;
         box-shadow: 0 -4px 20px rgba(8, 27, 51, 0.08);
-    }
-    .modern-footer h3 {
+    }}
+    .stApp .modern-footer h3 {{
         color: #ffffff !important;
         font-weight: 800;
         margin-bottom: 8px;
-    }
+    }}
 
-    /* Força cor escura nos títulos e textos gerais para não sumirem no modo escuro */
-    .stApp h1, .stApp h2, .stApp h3, .stApp label, .stApp .stMarkdown p, .stApp [data-testid="stCaptionContainer"] {
-        color: #0f172a !important;
-    }
-    /* Mantém o texto branco dentro do banner principal, barra lateral e rodapé */
-    .hero-modern h1, .hero-modern p, .modern-footer h3, .modern-footer p, section[data-testid="stSidebar"] * {
+    /* Textos gerais acompanhando o tema escolhido */
+    .stApp h1, .stApp h2, .stApp h3, .stApp label, .stApp .stMarkdown p, .stApp [data-testid="stCaptionContainer"] {{
+        color: {text_main} !important;
+    }}
+    .stApp .hero-modern h1, .stApp .hero-modern p, .stApp .modern-footer h3, .stApp .modern-footer p, section[data-testid="stSidebar"] * {{
         color: #ffffff !important;
-    }
+    }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -374,12 +408,12 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# BARRA DE AÇÕES RÁPIDAS
+# BARRA DE AÇÕES RÁPIDAS + SELETOR DE TEMA
 # ==========================================
-c_top1, c_top2, c_top3 = st.columns([2, 2, 1])
+c_top1, c_top2, c_top3, c_top4 = st.columns([2, 2, 1.1, 1])
 with c_top1:
     st.link_button(
-        f"💬 Atendimento WhatsApp {TELEFONE_EXIBICAO}",
+        f"💬 WhatsApp {TELEFONE_EXIBICAO}",
         f"https://wa.me/{WHATSAPP}?text={urllib.parse.quote('Olá, Peixaria KL! Vim pelo catálogo online e gostaria de tirar uma dúvida.')}",
         use_container_width=True
     )
@@ -390,6 +424,11 @@ with c_top2:
 with c_top3:
     if st.button("🔄 Atualizar Preços", use_container_width=True):
         st.cache_data.clear()
+        st.rerun()
+with c_top4:
+    label_tema = "☀️ Tema Claro" if st.session_state.modo_escuro else "🌙 Tema Escuro"
+    if st.button(label_tema, use_container_width=True):
+        st.session_state.modo_escuro = not st.session_state.modo_escuro
         st.rerun()
 
 # ==========================================
