@@ -62,9 +62,10 @@ else:
     border_divider = "#f1f5f9"
 
 # ==========================================
-# DESIGN MODERNO (CSS CUSTOMIZADO)
+# VERIFICAÇÃO GOOGLE + DESIGN MODERNO (CSS)
 # ==========================================
-st.markdown(f"""<style>
+st.markdown(f"""<meta name="google-site-verification" content="sAT29CpYlo6pvlmvSyfvcvDywIheVn0Esfi1AlMLVss" />
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 html, body, [class*="css"] {{
