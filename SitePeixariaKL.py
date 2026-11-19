@@ -27,6 +27,10 @@ ENDERECO_LOJA = "Rua Sérgio Felício de Souza, 995 - Quarto Centenário, Matão
 CIDADE_REGIAO = "Matão e Região - SP"
 TAXA_ENTREGA = 5.00
 LINK_PLANILHA_CSV = ""
+LINK_GOOGLE_MAPS = (
+    "https://www.google.com/maps/search/?api=1&query="
+    + urllib.parse.quote("Rua Sérgio Felício de Souza, 995 - Quarto Centenário, Matão - SP")
+)
 
 PASTA_ATUAL = os.path.dirname(os.path.abspath(__file__))
 ARQUIVO_EXCEL_LOCAL = os.path.join(PASTA_ATUAL, "Peixaria KL.xlsx")
@@ -49,6 +53,9 @@ if "categoria_ativa" not in st.session_state:
 
 if "busca_texto" not in st.session_state:
     st.session_state.busca_texto = ""
+
+if "ordenacao_catalogo" not in st.session_state:
+    st.session_state.ordenacao_catalogo = "Padrão"
 
 # ==========================================
 # PALETA DINÂMICA (CLARO / ESCURO)
@@ -327,6 +334,14 @@ div.stButton > button[kind="primary"] {{
     color: #ffffff !important;
     font-weight: 800;
     margin-bottom: 8px;
+}}
+.modern-footer a {{
+    color: #7dd3fc;
+    text-decoration: none;
+    font-weight: 600;
+}}
+.modern-footer a:hover {{
+    text-decoration: underline;
 }}
 
 /* Textos gerais acompanhando o tema escolhido */
@@ -855,6 +870,7 @@ with st.sidebar:
         else:
             st.markdown("**Taxa de entrega:** Grátis (Retirada)")
             st.info(f"📍 **Retirada em:**\n{ENDERECO_LOJA}")
+            st.markdown(f"[🗺️ Abrir localização no Google Maps]({LINK_GOOGLE_MAPS})")
         st.markdown(f"### {label_total} {formatar_moeda(total_final)}")
         st.markdown("---")
 
@@ -987,7 +1003,7 @@ else:
             st.session_state.categoria_ativa = cat
             st.rerun()
 
-    col_busca1, col_busca2 = st.columns([5, 1])
+    col_busca1, col_ordem, col_busca2 = st.columns([4.2, 1.8, 1])
     with col_busca1:
         busca = st.text_input(
             "🔍 O que você procura hoje?",
@@ -996,11 +1012,20 @@ else:
             key="input_busca_catalogo",
         )
         st.session_state.busca_texto = busca
+    with col_ordem:
+        ordenacao = st.selectbox(
+            "↕️ Ordenar por:",
+            ["Padrão", "Menor preço", "Maior preço"],
+            index=["Padrão", "Menor preço", "Maior preço"].index(st.session_state.ordenacao_catalogo),
+            key="select_ordenacao_catalogo",
+        )
+        st.session_state.ordenacao_catalogo = ordenacao
     with col_busca2:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-        if st.button("✖ Limpar", use_container_width=True, help="Limpar busca e voltar para Todas"):
+        if st.button("✖ Limpar", use_container_width=True, help="Limpar busca, ordenação e voltar para Todas"):
             st.session_state.busca_texto = ""
             st.session_state.categoria_ativa = "Todas"
+            st.session_state.ordenacao_catalogo = "Padrão"
             st.rerun()
 
     df_filtrado = df_produtos.copy()
@@ -1014,8 +1039,16 @@ else:
         ].apply(lambda x: termo_busca in normalizar_texto(x))
         df_filtrado = df_filtrado[mascara_busca]
 
+    if st.session_state.ordenacao_catalogo == "Menor preço":
+        df_filtrado = df_filtrado.sort_values(by=["Preco", "Produto"], ascending=[True, True])
+    elif st.session_state.ordenacao_catalogo == "Maior preço":
+        df_filtrado = df_filtrado.sort_values(by=["Preco", "Produto"], ascending=[False, True])
+
     df_filtrado = df_filtrado.reset_index(drop=True)
-    st.caption(f"Mostrando **{len(df_filtrado)}** produto(s) em **{st.session_state.categoria_ativa}**")
+    st.caption(
+        f"Mostrando **{len(df_filtrado)}** produto(s) em **{st.session_state.categoria_ativa}** • "
+        f"Ordenação: **{st.session_state.ordenacao_catalogo}**"
+    )
 
     if df_filtrado.empty:
         st.warning("Nenhum produto encontrado com esse filtro. Clique em **Limpar** para ver todo o catálogo.")
@@ -1084,7 +1117,7 @@ else:
 st.markdown(
     f"""<div class="modern-footer">
 <h3>🐟 {html.escape(NOME_LOJA)}</h3>
-<p style="margin:4px 0; color:#e2e8f0;">📍 {html.escape(ENDERECO_LOJA)}</p>
+<p style="margin:4px 0; color:#e2e8f0;">📍 {html.escape(ENDERECO_LOJA)} • <a href="{html.escape(LINK_GOOGLE_MAPS, quote=True)}" target="_blank">Ver no Google Maps</a></p>
 <p style="margin:4px 0; color:#e2e8f0;">🕒 {html.escape(HORARIO_ATENDIMENTO)}</p>
 <p style="margin:4px 0; color:#7dd3fc;">🚚 {html.escape(CIDADE_REGIAO)} • 📱 WhatsApp: <b>{html.escape(TELEFONE_EXIBICAO)}</b></p>
 <p style="margin-top:14px; font-size:0.78rem; color:#94a3b8;">
