@@ -1,7 +1,8 @@
 import os
-import streamlit as st
-import pandas as pd
+import unicodedata
 import urllib.parse
+import pandas as pd
+import streamlit as st
 
 # ==========================================
 # CONFIGURAÇÕES DA PEIXARIA KL
@@ -23,11 +24,17 @@ st.set_page_config(
     page_title=f"{NOME_LOJA} | Catálogo Digital",
     page_icon="🐟",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 if "modo_escuro" not in st.session_state:
     st.session_state.modo_escuro = False
+
+if "carrinho" not in st.session_state:
+    st.session_state.carrinho = {}
+
+if "categoria_ativa" not in st.session_state:
+    st.session_state.categoria_ativa = "Todas"
 
 # ==========================================
 # PALETA DINÂMICA (CLARO / ESCURO)
@@ -64,7 +71,8 @@ else:
 # ==========================================
 # DESIGN MODERNO (CSS CUSTOMIZADO)
 # ==========================================
-st.markdown(f"""<style>
+st.markdown(
+    f"""<style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 html, body, [class*="css"] {{
@@ -265,7 +273,9 @@ div.stButton > button[kind="primary"] {{
 .stApp .hero-modern h1, .stApp .hero-modern p, .stApp .modern-footer h3, .stApp .modern-footer p, section[data-testid="stSidebar"] * {{
     color: #ffffff !important;
 }}
-</style>""", unsafe_allow_html=True)
+</style>""",
+    unsafe_allow_html=True,
+)
 
 ICONES_CATEGORIA = {
     "Filés": "🐟",
@@ -276,10 +286,6 @@ ICONES_CATEGORIA = {
     "Diversos": "🦀",
 }
 
-# ==========================================
-# FOTOS ESPECÍFICAS POR PRODUTO EXATO
-# (Cole o link direto da foto entre as aspas OU preencha a coluna 'Imagem' na planilha)
-# ==========================================
 FOTOS_ESPECIFICAS = {
     # --- FILÉS ---
     "Filé de Bacalhau": "",
@@ -297,7 +303,6 @@ FOTOS_ESPECIFICAS = {
     "Filé de Uritinga (Pintado da Amazônia)": "",
     "Sardinha Espalmada": "",
     "Traíra Espalmada Retalhada": "",
-
     # --- POSTAS ---
     "Costelinha de Pacu": "",
     "Posta de Barbado": "",
@@ -305,7 +310,6 @@ FOTOS_ESPECIFICAS = {
     "Posta de Cação": "",
     "Posta de Tilápia": "",
     "Posta de Pintado": "",
-
     # --- PEIXES INTEIROS ---
     "Pacu Dessosado": "",
     "Corvina (G)": "",
@@ -324,12 +328,10 @@ FOTOS_ESPECIFICAS = {
     "Traíra": "",
     "Traíra (G)": "",
     "Tucunaré (G)": "",
-
     # --- CAMARÕES ---
     "Camarão (P)": "",
     "Camarão (M)": "",
     "Camarão (G)": "",
-
     # --- PRONTOS PARA FRITAR ---
     "Bolinho de Bacalhau": "",
     "Bolinho de Bacalhau Gourmet": "",
@@ -353,7 +355,6 @@ FOTOS_ESPECIFICAS = {
     "Tirinhas de Tilápia Empanadas": "",
     "Torresmo de Pacu Empanado": "",
     "Iscas de Filé de Frango Empanado": "",
-
     # --- DIVERSOS ---
     "Anel de Lula": "",
     "Caranguejo": "",
@@ -364,16 +365,6 @@ FOTOS_ESPECIFICAS = {
     "Sardinha Salgada": "",
     "Siri": "",
 }
-
-def obter_foto_produto(row):
-    # 1. Prioridade máxima: link preenchido na coluna 'Imagem' da planilha
-    img_planilha = str(row.get("Imagem", "")).strip()
-    if img_planilha and img_planilha.lower() not in ["nan", "none", ""]:
-        return img_planilha
-
-    # 2. Caso contrário, verifica se há link cadastrado no dicionário FOTOS_ESPECIFICAS acima
-    nome_produto = str(row.get("Produto", "")).strip()
-    return FOTOS_ESPECIFICAS.get(nome_produto, "").strip()
 
 DADOS_PADRAO = [
     ("Filés", "Filé de Bacalhau", "kg", 57.00, "Sim", ""),
@@ -451,43 +442,88 @@ DADOS_PADRAO = [
     ("Diversos", "Siri", "1Kg", 57.00, "Sim", ""),
 ]
 
-def eh_vendido_por_kg(peso_str):
+
+def normalizar_texto(texto: str) -> str:
+    """Remove acentos e padroniza para minúsculas para buscas naturais."""
+    texto_sem_acento = unicodedata.normalize("NFKD", str(texto))
+    texto_limpo = "".join(ch for ch in texto_sem_acento if not unicodedata.combining(ch))
+    return " ".join(texto_limpo.lower().split())
+
+
+def formatar_moeda(valor: float) -> str:
+    return f"R$ {valor:,.2f}".replace(".", ",")
+
+
+def eh_vendido_por_kg(peso_str: str) -> bool:
     return str(peso_str).strip().lower() == "kg"
 
+
+def gerar_chave_carrinho(produto: str, peso: str) -> str:
+    """Evita duplicidade no carrinho por diferença de maiúsculas ou espaços."""
+    return f"{normalizar_texto(produto)}||{normalizar_texto(peso)}"
+
+
+def obter_foto_produto(row: pd.Series) -> str:
+    img_planilha = str(row.get("Imagem", "")).strip()
+    if img_planilha and img_planilha.lower() not in ["nan", "none", ""]:
+        return img_planilha
+
+    nome_produto = str(row.get("Produto", "")).strip()
+    return FOTOS_ESPECIFICAS.get(nome_produto, "").strip()
+
+
 @st.cache_data(ttl=60)
-def carregar_produtos():
+def carregar_produtos() -> pd.DataFrame:
     if LINK_PLANILHA_CSV.strip():
         df = pd.read_csv(LINK_PLANILHA_CSV)
     else:
         if not os.path.exists(ARQUIVO_EXCEL_LOCAL):
-            df_novo = pd.DataFrame(DADOS_PADRAO, columns=["Categoria", "Produto", "Peso", "Preco", "Disponivel", "Imagem"])
+            df_novo = pd.DataFrame(
+                DADOS_PADRAO,
+                columns=["Categoria", "Produto", "Peso", "Preco", "Disponivel", "Imagem"],
+            )
             with pd.ExcelWriter(ARQUIVO_EXCEL_LOCAL, engine="openpyxl") as writer:
                 df_novo.to_excel(writer, sheet_name="Catalogo", index=False)
         df = pd.read_excel(ARQUIVO_EXCEL_LOCAL, sheet_name=0)
 
-    df.columns = [c.strip() for c in df.columns]
-    if "Disponivel" in df.columns:
-        df = df[df["Disponivel"].astype(str).str.strip().str.lower().isin(["sim", "s", "yes", "1"])]
+    df.columns = [str(c).strip() for c in df.columns]
 
-    df["Preco"] = (
+    if "Disponivel" in df.columns:
+        df = df[
+            df["Disponivel"]
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            .isin(["sim", "s", "yes", "1", "true"])
+        ]
+
+    # Tratamento seguro de preços: aceita "R$ 28,00" ou "28.00" e ignora linhas inválidas
+    preco_limpo = (
         df["Preco"]
         .astype(str)
         .str.replace("R$", "", regex=False)
+        .str.replace("r$", "", regex=False)
+        .str.replace(" ", "", regex=False)
         .str.replace(",", ".", regex=False)
-        .str.strip()
-        .astype(float)
     )
+    df["Preco"] = pd.to_numeric(preco_limpo, errors="coerce")
+    df = df.dropna(subset=["Preco"])
+    df = df[df["Preco"] > 0]
+
+    df["Categoria"] = df["Categoria"].astype(str).str.strip()
+    df["Produto"] = df["Produto"].astype(str).str.strip()
+    df["Peso"] = df["Peso"].astype(str).str.strip()
+
     return df.reset_index(drop=True)
 
-df_produtos = carregar_produtos()
 
-if "carrinho" not in st.session_state:
-    st.session_state.carrinho = {}
+df_produtos = carregar_produtos()
 
 # ==========================================
 # BANNER HERO MODERNO
 # ==========================================
-st.markdown(f"""<div class="hero-modern">
+st.markdown(
+    f"""<div class="hero-modern">
 <div class="hero-pill">🌊 Catálogo Digital Oficial</div>
 <h1>🐟 Peixaria <span>KL</span></h1>
 <p>{SLOGAN}</p>
@@ -496,7 +532,9 @@ st.markdown(f"""<div class="hero-modern">
 <span class="feature-chip">⚡ Pedido Rápido no WhatsApp</span>
 <span class="feature-chip">📍 {ENDERECO_LOJA}</span>
 </div>
-</div>""", unsafe_allow_html=True)
+</div>""",
+    unsafe_allow_html=True,
+)
 
 # ==========================================
 # BARRA DE AÇÕES RÁPIDAS + SELETOR DE TEMA
@@ -506,12 +544,12 @@ with c_top1:
     st.link_button(
         f"💬 WhatsApp {TELEFONE_EXIBICAO}",
         f"https://wa.me/{WHATSAPP}?text={urllib.parse.quote('Olá, Peixaria KL! Vim pelo catálogo online e gostaria de tirar uma dúvida.')}",
-        use_container_width=True
+        use_container_width=True,
     )
 with c_top2:
     qtd_itens = sum(item["qtd"] for item in st.session_state.carrinho.values())
-    total_topo = sum(item["qtd"] * item["preco"] for item in st.session_state.carrinho.values())
-    st.info(f"🛒 **Carrinho:** {qtd_itens} item(ns) • **R$ {total_topo:,.2f}**".replace(".", ","))
+    subtotal_topo = sum(item["qtd"] * item["preco"] for item in st.session_state.carrinho.values())
+    st.info(f"🛒 **Carrinho:** {qtd_itens} item(ns) • **Subtotal:** {formatar_moeda(subtotal_topo)}")
 with c_top3:
     if st.button("🔄 Atualizar Preços", use_container_width=True):
         st.cache_data.clear()
@@ -541,7 +579,7 @@ with st.sidebar:
             if por_kg:
                 tem_item_kg = True
 
-            etiqueta_peso = f"{item['peso']} • ⚖️ A pesar" if por_kg else item["peso"]
+            etiqueta_peso = f"{item['peso']} • ⚖️ Estimativa / A pesar" if por_kg else item["peso"]
             st.markdown(f"**{item['produto']}** • `{etiqueta_peso}`")
             b1, b2, b3, b4 = st.columns([1, 1, 1, 2])
             if b1.button("➖", key=f"menos_{chave}"):
@@ -554,55 +592,72 @@ with st.sidebar:
             if b3.button("➕", key=f"mais_{chave}"):
                 st.session_state.carrinho[chave]["qtd"] += 1
                 st.rerun()
-            b4.markdown(f"**R$ {subtotal:,.2f}**".replace(".", ","))
+            b4.markdown(f"**{formatar_moeda(subtotal)}**")
             st.divider()
 
             if por_kg:
                 linhas_itens_zap.append(
-                    f"• {item['qtd']} unid./peça(s) de {item['produto']} (R$ {item['preco']:,.2f}/kg — *pesar na balança*)".replace(".", ",")
+                    f"• {item['qtd']} peça(s)/estimativa de {item['produto']} ({formatar_moeda(item['preco'])}/kg — *pesar na balança*)"
                 )
             else:
                 linhas_itens_zap.append(
-                    f"• {item['qtd']}x {item['produto']} ({item['peso']}) — R$ {subtotal:,.2f}".replace(".", ",")
+                    f"• {item['qtd']}x {item['produto']} ({item['peso']}) — {formatar_moeda(subtotal)}"
                 )
 
         if tem_item_kg:
-            st.warning("⚖️ **Itens por kg:** O peso exato será conferido na balança e o valor final será enviado pelo WhatsApp.")
+            st.warning(
+                "⚖️ **Itens por kg:** O valor exibido é uma estimativa inicial. O peso exato será conferido na balança e confirmado pelo WhatsApp."
+            )
 
         tipo_entrega = st.radio("Modo de recebimento:", ["🚚 Entrega (Delivery)", "🏪 Retirar na Loja"])
         eh_entrega = "Entrega" in tipo_entrega
         valor_entrega = TAXA_ENTREGA if eh_entrega else 0.0
         total_final = subtotal_produtos + valor_entrega
 
-        # Resumo organizado de valores na barra lateral
         st.markdown("---")
         label_subtotal = "Subtotal estimado:" if tem_item_kg else "Subtotal dos itens:"
         label_total = "Total estimado:" if tem_item_kg else "Total:"
-        st.markdown(f"**{label_subtotal}** R$ {subtotal_produtos:,.2f}".replace(".", ","))
+        st.markdown(f"**{label_subtotal}** {formatar_moeda(subtotal_produtos)}")
         if eh_entrega:
-            st.markdown(f"**Taxa de entrega:** + R$ {valor_entrega:,.2f}".replace(".", ","))
+            st.markdown(f"**Taxa de entrega:** + {formatar_moeda(valor_entrega)}")
         else:
             st.markdown("**Taxa de entrega:** Grátis (Retirada)")
             st.info(f"📍 **Retirada em:**\n{ENDERECO_LOJA}")
-        st.markdown(f"### {label_total} R$ {total_final:,.2f}".replace(".", ","))
+        st.markdown(f"### {label_total} {formatar_moeda(total_final)}")
         st.markdown("---")
 
         nome_cliente = st.text_input("Seu nome:", placeholder="Ex: Maria Oliveira")
         endereco = ""
-        if eh_entrega:
-            endereco = st.text_input("Endereço de entrega:", placeholder="Rua, número, bairro...")
-        forma_pagamento = st.selectbox("Pagamento:", ["Pix", "Cartão (Crédito/Débito)", "Dinheiro"])
-        observacoes = st.text_input("Observações:", placeholder="Ex: Peixe de aprox. 2kg, limpo em postas...")
+        endereco_valido = True
 
-        # Mensagem organizada para o WhatsApp
+        if eh_entrega:
+            endereco = st.text_input(
+                "Endereço de entrega (obrigatório):",
+                placeholder="Rua, número, bairro...",
+            )
+            endereco_valido = len(endereco.strip()) >= 5
+            if not endereco_valido:
+                st.warning("📍 Informe o endereço completo (rua, número e bairro) para habilitar o envio da entrega.")
+
+        forma_pagamento = st.selectbox("Pagamento:", ["Pix", "Cartão (Crédito/Débito)", "Dinheiro"])
+        troco_para = ""
+        if forma_pagamento == "Dinheiro":
+            troco_para = st.text_input("Troco para quanto? (opcional)", placeholder="Ex: R$ 100,00")
+
+        observacoes = st.text_input(
+            "Observações:",
+            placeholder="Ex: Peixe de aprox. 2kg, limpo em postas...",
+        )
+
+        # Montagem da mensagem para o WhatsApp
         linhas_zap = [f"Olá, *{NOME_LOJA}*! Gostaria de fazer o seguinte pedido:\n"]
         linhas_zap.extend(linhas_itens_zap)
         if tem_item_kg:
             linhas_zap.append("\n⚖️ _Pedido contém item(ns) por kg: favor confirmar o peso e o valor exato na balança._")
-        linhas_zap.append(f"\n*{label_subtotal}* R$ {subtotal_produtos:,.2f}".replace(".", ","))
+        linhas_zap.append(f"\n*{label_subtotal}* {formatar_moeda(subtotal_produtos)}")
         if eh_entrega:
-            linhas_zap.append(f"*Taxa de entrega:* R$ {valor_entrega:,.2f}".replace(".", ","))
-        linhas_zap.append(f"*{label_total} R$ {total_final:,.2f}*".replace(".", ","))
+            linhas_zap.append(f"*Taxa de entrega:* {formatar_moeda(valor_entrega)}")
+        linhas_zap.append(f"*{label_total} {formatar_moeda(total_final)}*")
         linhas_zap.append(f"\n*Recebimento:* {tipo_entrega}")
         if not eh_entrega:
             linhas_zap.append(f"*Local de retirada:* {ENDERECO_LOJA}")
@@ -611,13 +666,18 @@ with st.sidebar:
         if endereco.strip():
             linhas_zap.append(f"*Endereço:* {endereco.strip()}")
         linhas_zap.append(f"*Pagamento:* {forma_pagamento}")
+        if forma_pagamento == "Dinheiro" and troco_para.strip():
+            linhas_zap.append(f"*Troco para:* {troco_para.strip()}")
         if observacoes.strip():
             linhas_zap.append(f"*Obs:* {observacoes.strip()}")
 
         texto_final = urllib.parse.quote("\n".join(linhas_zap))
         link_whatsapp = f"https://wa.me/{WHATSAPP}?text={texto_final}"
 
-        st.link_button("📲 Enviar Pedido no WhatsApp", link_whatsapp, type="primary", use_container_width=True)
+        if endereco_valido:
+            st.link_button("📲 Enviar Pedido no WhatsApp", link_whatsapp, type="primary", use_container_width=True)
+        else:
+            st.button("📲 Preencha o endereço para enviar", disabled=True, use_container_width=True)
 
         if st.button("🗑️ Limpar Carrinho", use_container_width=True):
             st.session_state.carrinho = {}
@@ -630,7 +690,7 @@ st.markdown("### 🧭 Explore por Categoria")
 contagem_cats = df_produtos["Categoria"].value_counts().to_dict()
 categorias_disponiveis = ["Todas"] + list(df_produtos["Categoria"].unique())
 
-if "categoria_ativa" not in st.session_state:
+if st.session_state.categoria_ativa not in categorias_disponiveis:
     st.session_state.categoria_ativa = "Todas"
 
 cols_cat = st.columns(len(categorias_disponiveis))
@@ -642,13 +702,21 @@ for i, cat in enumerate(categorias_disponiveis):
         st.session_state.categoria_ativa = cat
         st.rerun()
 
-busca = st.text_input("🔍 O que você procura hoje?", placeholder="Pesquise por Salmão, Tilápia, Camarão, Bolinho, Posta...")
+busca = st.text_input(
+    "🔍 O que você procura hoje?",
+    placeholder="Pesquise por Salmao, Tilápia, Camarão, Bolinho, Posta...",
+)
 
 df_filtrado = df_produtos.copy()
 if st.session_state.categoria_ativa != "Todas":
     df_filtrado = df_filtrado[df_filtrado["Categoria"] == st.session_state.categoria_ativa]
+
 if busca.strip():
-    df_filtrado = df_filtrado[df_filtrado["Produto"].str.contains(busca, case=False, na=False)]
+    termo_busca = normalizar_texto(busca)
+    mascara_busca = df_filtrado["Produto"].apply(lambda x: termo_busca in normalizar_texto(x)) | df_filtrado[
+        "Categoria"
+    ].apply(lambda x: termo_busca in normalizar_texto(x))
+    df_filtrado = df_filtrado[mascara_busca]
 
 df_filtrado = df_filtrado.reset_index(drop=True)
 st.caption(f"Mostrando **{len(df_filtrado)}** produto(s) em **{st.session_state.categoria_ativa}**")
@@ -664,7 +732,7 @@ else:
         coluna = cols[idx % 3]
         with coluna:
             icone_cat = ICONES_CATEGORIA.get(row["Categoria"], "🐟")
-            preco_fmt = f"R$ {row['Preco']:,.2f}".replace(".", ",")
+            preco_fmt = formatar_moeda(row["Preco"])
             por_kg = eh_vendido_por_kg(row["Peso"])
             badge_peso = "⚖️ Por kg" if por_kg else f"📦 {row['Peso']}"
             label_preco = "Valor por kg (pesado na hora)" if por_kg else "Preço unitário"
@@ -673,9 +741,13 @@ else:
             foto_url = obter_foto_produto(row)
             bloco_foto = ""
             if foto_url:
-                bloco_foto = f'<div class="product-photo-box"><img src="{foto_url}" class="product-photo-img" alt="{row["Produto"]}" onerror="this.parentElement.style.display=\'none\'"></div>'
+                bloco_foto = (
+                    f'<div class="product-photo-box"><img src="{foto_url}" class="product-photo-img" '
+                    f'alt="{row["Produto"]}" onerror="this.parentElement.style.display=\'none\'"></div>'
+                )
 
-            st.markdown(f"""<div class="product-card">
+            st.markdown(
+                f"""<div class="product-card">
 <div class="card-top-row">
 <span class="cat-badge">{icone_cat} {row['Categoria']}</span>
 <span class="weight-badge">{badge_peso}</span>
@@ -686,17 +758,19 @@ else:
 <span class="price-label">{label_preco}</span>
 <span class="price-number">{preco_exibicao}</span>
 </div>
-</div>""", unsafe_allow_html=True)
+</div>""",
+                unsafe_allow_html=True,
+            )
 
-            if st.button("🛒 Adicionar", key=f"add_{idx}", use_container_width=True):
-                chave = f"{row['Produto']}_{row['Peso']}"
-                if chave in st.session_state.carrinho:
-                    st.session_state.carrinho[chave]["qtd"] += 1
+            chave_item = gerar_chave_carrinho(row["Produto"], row["Peso"])
+            if st.button("🛒 Adicionar", key=f"add_{chave_item}_{idx}", use_container_width=True):
+                if chave_item in st.session_state.carrinho:
+                    st.session_state.carrinho[chave_item]["qtd"] += 1
                 else:
-                    st.session_state.carrinho[chave] = {
+                    st.session_state.carrinho[chave_item] = {
                         "produto": row["Produto"],
                         "peso": row["Peso"],
-                        "preco": row["Preco"],
+                        "preco": float(row["Preco"]),
                         "qtd": 1,
                     }
                 st.toast(f"✅ {row['Produto']} adicionado ao carrinho!")
@@ -705,12 +779,15 @@ else:
 # ==========================================
 # RODAPÉ MODERNO
 # ==========================================
-st.markdown(f"""<div class="modern-footer">
+st.markdown(
+    f"""<div class="modern-footer">
 <h3>🐟 {NOME_LOJA}</h3>
 <p style="margin:4px 0; color:#e2e8f0;">📍 {ENDERECO_LOJA}</p>
 <p style="margin:4px 0; color:#e2e8f0;">🕒 {HORARIO_ATENDIMENTO}</p>
 <p style="margin:4px 0; color:#7dd3fc;">🚚 {CIDADE_REGIAO} • 📱 WhatsApp: <b>{TELEFONE_EXIBICAO}</b></p>
 <p style="margin-top:14px; font-size:0.78rem; color:#94a3b8;">
-* Valores sujeitos à disponibilidade de estoque. Itens por kg são pesados na balança e confirmados pelo WhatsApp. Taxa de entrega: R$ {TAXA_ENTREGA:,.2f}.
+- Valores sujeitos à disponibilidade de estoque. Itens por kg são pesados na balança e confirmados pelo WhatsApp. Taxa de entrega: {formatar_moeda(TAXA_ENTREGA)}.
 </p>
-</div>""", unsafe_allow_html=True)
+</div>""",
+    unsafe_allow_html=True,
+)
