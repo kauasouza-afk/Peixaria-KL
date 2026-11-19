@@ -1,6 +1,13 @@
+from datetime import datetime
+import html
 import os
 import unicodedata
 import urllib.parse
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:  # Fallback raro caso zoneinfo não exista no ambiente
+    ZoneInfo = None
+
 import pandas as pd
 import streamlit as st
 
@@ -36,13 +43,16 @@ if "carrinho" not in st.session_state:
 if "categoria_ativa" not in st.session_state:
     st.session_state.categoria_ativa = "Todas"
 
+if "busca_texto" not in st.session_state:
+    st.session_state.busca_texto = ""
+
 # ==========================================
 # PALETA DINÂMICA (CLARO / ESCURO)
 # ==========================================
 if st.session_state.modo_escuro:
-    bg_app = "linear-gradient(180deg, #091326 0%, #0f172a 50%, #020617 100%)"
-    bg_card = "#1e293b"
-    border_card = "#334155"
+    bg_app = "linear-gradient(180deg, #071124 0%, #0d172a 55%, #020617 100%)"
+    bg_card = "#162236"
+    border_card = "#2a3b55"
     text_main = "#f8fafc"
     text_muted = "#94a3b8"
     price_color = "#38bdf8"
@@ -52,9 +62,11 @@ if st.session_state.modo_escuro:
     bg_weight_badge = "#0f172a"
     text_weight_badge = "#cbd5e1"
     border_weight_badge = "#334155"
-    border_divider = "#334155"
+    border_divider = "#2a3b55"
+    summary_bg = "rgba(15, 23, 42, 0.72)"
+    summary_border = "rgba(125, 211, 252, 0.25)"
 else:
-    bg_app = "linear-gradient(180deg, #eef6fc 0%, #f8fafc 40%, #f1f5f9 100%)"
+    bg_app = "linear-gradient(180deg, #eaf4fc 0%, #f8fafc 45%, #f1f5f9 100%)"
     bg_card = "#ffffff"
     border_card = "#e2e8f0"
     text_main = "#0f172a"
@@ -66,7 +78,9 @@ else:
     bg_weight_badge = "#f8fafc"
     text_weight_badge = "#475569"
     border_weight_badge = "#e2e8f0"
-    border_divider = "#f1f5f9"
+    border_divider = "#eef2f6"
+    summary_bg = "#ffffff"
+    summary_border = "#dbeafe"
 
 # ==========================================
 # DESIGN MODERNO (CSS CUSTOMIZADO)
@@ -81,6 +95,10 @@ html, body, [class*="css"] {{
 .stApp {{
     background: {bg_app};
 }}
+.block-container {{
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+}}
 
 /* Esconde menu padrão superior do Streamlit */
 #MainMenu {{visibility: hidden;}}
@@ -89,13 +107,13 @@ header[data-testid="stHeader"] {{background: transparent;}}
 
 /* Banner Hero Moderno */
 .hero-modern {{
-    background: radial-gradient(circle at top right, #0ea5e9 0%, #0369a1 35%, #081b33 100%);
-    padding: 38px 28px;
-    border-radius: 24px;
+    background: radial-gradient(circle at top right, #0ea5e9 0%, #0369a1 38%, #081b33 100%);
+    padding: 34px 26px;
+    border-radius: 22px;
     color: white;
     text-align: center;
-    box-shadow: 0 20px 40px -15px rgba(8, 27, 51, 0.35);
-    margin-bottom: 24px;
+    box-shadow: 0 18px 36px -14px rgba(8, 27, 51, 0.35);
+    margin-bottom: 20px;
     position: relative;
     overflow: hidden;
 }}
@@ -105,18 +123,28 @@ header[data-testid="stHeader"] {{background: transparent;}}
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.25);
     color: #7dd3fc;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
-    padding: 6px 16px;
+    padding: 6px 15px;
     border-radius: 999px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+}}
+.status-open {{
+    background: rgba(16, 185, 129, 0.22);
+    border: 1px solid rgba(110, 231, 183, 0.55);
+    color: #a7f3d0 !important;
+}}
+.status-closed {{
+    background: rgba(239, 68, 68, 0.22);
+    border: 1px solid rgba(252, 165, 165, 0.55);
+    color: #fecaca !important;
 }}
 .stApp .hero-modern h1 {{
     color: #ffffff !important;
     margin: 0;
-    font-size: 2.9rem;
+    font-size: 2.75rem;
     font-weight: 800;
     letter-spacing: -1px;
     line-height: 1.1;
@@ -127,9 +155,9 @@ header[data-testid="stHeader"] {{background: transparent;}}
     -webkit-text-fill-color: transparent;
 }}
 .stApp .hero-modern p {{
-    margin: 12px auto 22px auto;
-    max-width: 650px;
-    font-size: 1.05rem;
+    margin: 10px auto 18px auto;
+    max-width: 660px;
+    font-size: 1.02rem;
     color: #e0f2fe !important;
     font-weight: 400;
 }}
@@ -142,57 +170,77 @@ header[data-testid="stHeader"] {{background: transparent;}}
 .feature-chip {{
     background: rgba(8, 27, 51, 0.45);
     border: 1px solid rgba(125, 211, 252, 0.3);
-    padding: 7px 15px;
+    padding: 6px 14px;
     border-radius: 12px;
-    font-size: 0.84rem;
+    font-size: 0.82rem;
     color: #f0f9ff !important;
     font-weight: 600;
 }}
 
-/* Card de Produto Moderno */
+/* Barra de resumo do catálogo / carrinho */
+.top-summary-box {{
+    background: {summary_bg};
+    border: 1px solid {summary_border};
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-size: 0.92rem;
+    color: {text_main};
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 42px;
+}}
+
+/* Card de Produto Moderno com estrutura uniforme */
 .product-card {{
     background: {bg_card};
     border-radius: 18px;
     padding: 18px;
     border: 1px solid {border_card};
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-bottom: 10px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }}
 .product-card:hover {{
-    transform: translateY(-4px);
-    box-shadow: 0 14px 28px -8px rgba(2, 132, 199, 0.25);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 26px -8px rgba(2, 132, 199, 0.22);
     border-color: #38bdf8;
 }}
 .card-top-row {{
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
     margin-bottom: 12px;
 }}
 .cat-badge {{
     background: {bg_cat_badge};
     color: {text_cat_badge};
-    font-size: 0.74rem;
+    font-size: 0.73rem;
     font-weight: 700;
     padding: 4px 11px;
     border-radius: 999px;
     border: 1px solid {border_cat_badge};
+    white-space: nowrap;
 }}
 .weight-badge {{
     background: {bg_weight_badge};
     color: {text_weight_badge};
-    font-size: 0.76rem;
+    font-size: 0.75rem;
     font-weight: 700;
     padding: 4px 10px;
     border-radius: 8px;
     border: 1px solid {border_weight_badge};
+    white-space: nowrap;
 }}
 
 /* Foto limpa e responsiva quando cadastrada na planilha */
 .product-photo-box {{
     width: 100%;
-    height: 170px;
+    height: 168px;
     border-radius: 14px;
     overflow: hidden;
     margin-bottom: 12px;
@@ -206,23 +254,24 @@ header[data-testid="stHeader"] {{background: transparent;}}
     transition: transform 0.3s ease;
 }}
 .product-card:hover .product-photo-img {{
-    transform: scale(1.05);
+    transform: scale(1.04);
 }}
 
 .prod-name {{
     color: {text_main};
-    font-size: 1.12rem;
+    font-size: 1.08rem;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.32;
     min-height: 44px;
-    margin: 6px 0 6px 0;
+    margin: 4px 0 6px 0;
     text-align: left;
 }}
 .prod-tip {{
     color: {text_muted};
     font-size: 0.78rem;
     font-weight: 500;
-    min-height: 22px;
+    line-height: 1.3;
+    min-height: 24px;
     margin-bottom: 12px;
     text-align: left;
 }}
@@ -230,19 +279,21 @@ header[data-testid="stHeader"] {{background: transparent;}}
     display: flex;
     align-items: baseline;
     justify-content: space-between;
+    gap: 8px;
     padding-top: 12px;
     border-top: 1px solid {border_divider};
 }}
 .price-label {{
-    font-size: 0.78rem;
+    font-size: 0.77rem;
     color: {text_muted};
     font-weight: 500;
 }}
 .price-number {{
-    font-size: 1.45rem;
+    font-size: 1.4rem;
     font-weight: 800;
     color: {price_color};
     letter-spacing: -0.5px;
+    white-space: nowrap;
 }}
 
 /* Botões Streamlit Estilizados */
@@ -262,10 +313,10 @@ div.stButton > button[kind="primary"] {{
 .modern-footer {{
     background: #081b33;
     color: #cbd5e1;
-    padding: 34px 24px;
+    padding: 32px 24px;
     border-radius: 22px;
     text-align: center;
-    margin-top: 48px;
+    margin-top: 44px;
     box-shadow: 0 -4px 20px rgba(8, 27, 51, 0.08);
 }}
 .stApp .modern-footer h3 {{
@@ -291,7 +342,7 @@ section[data-testid="stSidebar"] .stMarkdown p {{
     color: #ffffff !important;
 }}
 section[data-testid="stSidebar"] [data-testid="stAlert"] {{
-    background-color: rgba(15, 23, 42, 0.75) !important;
+    background-color: rgba(15, 23, 42, 0.78) !important;
     border: 1px solid rgba(125, 211, 252, 0.35) !important;
     border-radius: 12px !important;
 }}
@@ -479,6 +530,32 @@ DADOS_PADRAO = [
 ]
 
 
+def obter_status_loja():
+    """Retorna (esta_aberto, texto_status) no fuso de Matão - SP."""
+    agora = None
+    if ZoneInfo is not None:
+        try:
+            agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        except Exception:
+            agora = None
+    if agora is None:
+        agora = datetime.now()
+
+    dia_semana = agora.weekday()  # 0=Seg .. 5=Sáb, 6=Dom
+    hora_decimal = agora.hour + (agora.minute / 60.0)
+
+    if 0 <= dia_semana <= 5:
+        aberto = 8.0 <= hora_decimal < 18.0
+    elif dia_semana == 6:
+        aberto = 8.0 <= hora_decimal < 12.0
+    else:
+        aberto = False
+
+    if aberto:
+        return True, "🟢 Aberto agora • Matão - SP"
+    return False, "🔴 Fechado no momento • Veja os horários"
+
+
 def normalizar_texto(texto: str) -> str:
     """Remove acentos e padroniza para minúsculas para buscas naturais."""
     texto_sem_acento = unicodedata.normalize("NFKD", str(texto))
@@ -502,10 +579,14 @@ def gerar_chave_carrinho(produto: str, peso: str) -> str:
 def obter_foto_produto(row: pd.Series) -> str:
     img_planilha = str(row.get("Imagem", "")).strip()
     if img_planilha and img_planilha.lower() not in ["nan", "none", ""]:
-        return img_planilha
+        url = img_planilha
+    else:
+        nome_produto = str(row.get("Produto", "")).strip()
+        url = FOTOS_ESPECIFICAS.get(nome_produto, "").strip()
 
-    nome_produto = str(row.get("Produto", "")).strip()
-    return FOTOS_ESPECIFICAS.get(nome_produto, "").strip()
+    if url.startswith("https://") or url.startswith("http://"):
+        return url
+    return ""
 
 
 @st.cache_data(ttl=60)
@@ -533,7 +614,6 @@ def carregar_produtos() -> pd.DataFrame:
             .isin(["sim", "s", "yes", "1", "true"])
         ]
 
-    # Tratamento seguro de preços: aceita "R$ 28,00" ou "28.00" e ignora linhas inválidas
     preco_limpo = (
         df["Preco"]
         .astype(str)
@@ -554,6 +634,8 @@ def carregar_produtos() -> pd.DataFrame:
 
 
 df_produtos = carregar_produtos()
+esta_aberto, texto_status = obter_status_loja()
+classe_status = "status-open" if esta_aberto else "status-closed"
 
 # ==========================================
 # BANNER HERO MODERNO
@@ -561,12 +643,13 @@ df_produtos = carregar_produtos()
 st.markdown(
     f"""<div class="hero-modern">
 <div class="hero-pill">🌊 Catálogo Digital Oficial</div>
+<div class="hero-pill {classe_status}" style="margin-left: 8px;">{html.escape(texto_status)}</div>
 <h1>🐟 Peixaria <span>KL</span></h1>
-<p>{SLOGAN}</p>
+<p>{html.escape(SLOGAN)}</p>
 <div class="hero-features">
 <span class="feature-chip">❄️ Frescor Garantido</span>
 <span class="feature-chip">⚡ Pedido Rápido no WhatsApp</span>
-<span class="feature-chip">📍 {ENDERECO_LOJA}</span>
+<span class="feature-chip">📍 {html.escape(ENDERECO_LOJA)}</span>
 </div>
 </div>""",
     unsafe_allow_html=True,
@@ -575,7 +658,10 @@ st.markdown(
 # ==========================================
 # BARRA DE AÇÕES RÁPIDAS + SELETOR DE TEMA
 # ==========================================
-c_top1, c_top2, c_top3, c_top4 = st.columns([2, 2, 1.1, 1])
+qtd_itens = sum(item["qtd"] for item in st.session_state.carrinho.values())
+subtotal_topo = sum(item["qtd"] * item["preco"] for item in st.session_state.carrinho.values())
+
+c_top1, c_top2, c_top3, c_top4 = st.columns([2.1, 2.2, 1.1, 1.1])
 with c_top1:
     st.link_button(
         f"💬 WhatsApp {TELEFONE_EXIBICAO}",
@@ -583,15 +669,19 @@ with c_top1:
         use_container_width=True,
     )
 with c_top2:
-    qtd_itens = sum(item["qtd"] for item in st.session_state.carrinho.values())
-    subtotal_topo = sum(item["qtd"] * item["preco"] for item in st.session_state.carrinho.values())
-    st.info(f"🛒 **Carrinho:** {qtd_itens} item(ns) • **Subtotal:** {formatar_moeda(subtotal_topo)}")
+    st.markdown(
+        f"""<div class="top-summary-box">
+<span>🛒 <b>Carrinho:</b> {qtd_itens} item(ns)</span>
+<span><b>{formatar_moeda(subtotal_topo)}</b></span>
+</div>""",
+        unsafe_allow_html=True,
+    )
 with c_top3:
-    if st.button("🔄 Atualizar Preços", use_container_width=True):
+    if st.button("🔄 Atualizar", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
 with c_top4:
-    label_tema = "☀️ Tema Claro" if st.session_state.modo_escuro else "🌙 Tema Escuro"
+    label_tema = "☀️ Claro" if st.session_state.modo_escuro else "🌙 Escuro"
     if st.button(label_tema, use_container_width=True):
         st.session_state.modo_escuro = not st.session_state.modo_escuro
         st.rerun()
@@ -604,6 +694,10 @@ with st.sidebar:
     if not st.session_state.carrinho:
         st.info("Seu carrinho está vazio.\n\nEscolha os itens no catálogo ao lado e clique em **Adicionar**.")
     else:
+        qtd_tipos = len(st.session_state.carrinho)
+        qtd_total_unid = sum(item["qtd"] for item in st.session_state.carrinho.values())
+        st.caption(f"Resumo: {qtd_tipos} tipo(s) de item • {qtd_total_unid} unidade(s)")
+
         subtotal_produtos = 0.0
         tem_item_kg = False
         linhas_itens_zap = []
@@ -616,7 +710,12 @@ with st.sidebar:
                 tem_item_kg = True
 
             etiqueta_peso = f"{item['peso']} • ⚖️ Estimativa / A pesar" if por_kg else item["peso"]
-            st.markdown(f"**{item['produto']}** • `{etiqueta_peso}`")
+            topo_item_col1, topo_item_col2 = st.columns([5, 1])
+            topo_item_col1.markdown(f"**{item['produto']}** • `{etiqueta_peso}`")
+            if topo_item_col2.button("✕", key=f"rem_{chave}", help="Remover item"):
+                del st.session_state.carrinho[chave]
+                st.rerun()
+
             b1, b2, b3, b4 = st.columns([1, 1, 1, 2])
             if b1.button("➖", key=f"menos_{chave}"):
                 if item["qtd"] > 1:
@@ -662,18 +761,25 @@ with st.sidebar:
         st.markdown(f"### {label_total} {formatar_moeda(total_final)}")
         st.markdown("---")
 
-        nome_cliente = st.text_input("Seu nome:", placeholder="Ex: Maria Oliveira")
+        nome_cliente = st.text_input(
+            "Seu nome (obrigatório):",
+            placeholder="Ex: Maria Oliveira",
+        )
+        nome_valido = len(nome_cliente.strip()) >= 2
+
         endereco = ""
         endereco_valido = True
-
         if eh_entrega:
             endereco = st.text_input(
                 "Endereço de entrega (obrigatório):",
                 placeholder="Rua, número, bairro...",
             )
             endereco_valido = len(endereco.strip()) >= 5
-            if not endereco_valido:
-                st.warning("📍 Informe o endereço completo (rua, número e bairro) para habilitar o envio da entrega.")
+
+        if not nome_valido:
+            st.warning("👤 Informe seu nome para identificarmos o seu pedido.")
+        if eh_entrega and not endereco_valido:
+            st.warning("📍 Informe o endereço completo (rua, número e bairro) para entrega.")
 
         forma_pagamento = st.selectbox("Pagamento:", ["Pix", "Cartão (Crédito/Débito)", "Dinheiro"])
         troco_para = ""
@@ -681,12 +787,14 @@ with st.sidebar:
             troco_para = st.text_input("Troco para quanto? (opcional)", placeholder="Ex: R$ 100,00")
 
         observacoes = st.text_input(
-            "Observações:",
-            placeholder="Ex: Peixe de aprox. 2kg, limpo em postas...",
+            "Observações de preparo:",
+            placeholder="Ex: Peixe limpo, sem escamas, em postas...",
         )
 
-        # Montagem da mensagem para o WhatsApp
+        st.caption(f"Confirmação: {qtd_total_unid} unid. • {tipo_entrega}")
+
         linhas_zap = [f"Olá, *{NOME_LOJA}*! Gostaria de fazer o seguinte pedido:\n"]
+        linhas_zap.append(f"*Cliente:* {nome_cliente.strip()}\n")
         linhas_zap.extend(linhas_itens_zap)
         if tem_item_kg:
             linhas_zap.append("\n⚖️ _Pedido contém item(ns) por kg: favor confirmar o peso e o valor exato na balança._")
@@ -697,8 +805,6 @@ with st.sidebar:
         linhas_zap.append(f"\n*Recebimento:* {tipo_entrega}")
         if not eh_entrega:
             linhas_zap.append(f"*Local de retirada:* {ENDERECO_LOJA}")
-        if nome_cliente.strip():
-            linhas_zap.append(f"*Cliente:* {nome_cliente.strip()}")
         if endereco.strip():
             linhas_zap.append(f"*Endereço:* {endereco.strip()}")
         linhas_zap.append(f"*Pagamento:* {forma_pagamento}")
@@ -710,14 +816,20 @@ with st.sidebar:
         texto_final = urllib.parse.quote("\n".join(linhas_zap))
         link_whatsapp = f"https://wa.me/{WHATSAPP}?text={texto_final}"
 
-        if endereco_valido:
+        pode_enviar = nome_valido and endereco_valido
+        if pode_enviar:
             st.link_button("📲 Enviar Pedido no WhatsApp", link_whatsapp, type="primary", use_container_width=True)
             if len(link_whatsapp) > 1800:
                 st.warning(
                     "⚠️ **Mensagem extensa:** Alguns navegadores limitam links muito longos. Se algum detalhe faltar ao abrir o WhatsApp, envie o pedido e complete na conversa."
                 )
         else:
-            st.button("📲 Preencha o endereço para enviar", disabled=True, use_container_width=True)
+            texto_bloqueio = (
+                "📲 Preencha seu nome para enviar"
+                if not nome_valido
+                else "📲 Preencha o endereço para enviar"
+            )
+            st.button(texto_bloqueio, disabled=True, use_container_width=True)
 
         if st.button("🗑️ Limpar Carrinho", use_container_width=True):
             st.session_state.carrinho = {}
@@ -752,17 +864,28 @@ else:
             st.session_state.categoria_ativa = cat
             st.rerun()
 
-    busca = st.text_input(
-        "🔍 O que você procura hoje?",
-        placeholder="Pesquise por Salmao, Tilápia, Camarão, Bolinho, Posta...",
-    )
+    col_busca1, col_busca2 = st.columns([5, 1])
+    with col_busca1:
+        busca = st.text_input(
+            "🔍 O que você procura hoje?",
+            value=st.session_state.busca_texto,
+            placeholder="Pesquise por Salmao, Tilápia, Camarão, Bolinho, Posta...",
+            key="input_busca_catalogo",
+        )
+        st.session_state.busca_texto = busca
+    with col_busca2:
+        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+        if st.button("✖ Limpar", use_container_width=True, help="Limpar busca e voltar para Todas"):
+            st.session_state.busca_texto = ""
+            st.session_state.categoria_ativa = "Todas"
+            st.rerun()
 
     df_filtrado = df_produtos.copy()
     if st.session_state.categoria_ativa != "Todas":
         df_filtrado = df_filtrado[df_filtrado["Categoria"] == st.session_state.categoria_ativa]
 
-    if busca.strip():
-        termo_busca = normalizar_texto(busca)
+    if st.session_state.busca_texto.strip():
+        termo_busca = normalizar_texto(st.session_state.busca_texto)
         mascara_busca = df_filtrado["Produto"].apply(lambda x: termo_busca in normalizar_texto(x)) | df_filtrado[
             "Categoria"
         ].apply(lambda x: termo_busca in normalizar_texto(x))
@@ -772,7 +895,7 @@ else:
     st.caption(f"Mostrando **{len(df_filtrado)}** produto(s) em **{st.session_state.categoria_ativa}**")
 
     if df_filtrado.empty:
-        st.warning("Nenhum produto encontrado. Tente buscar por outro nome ou clique em 'Todas'.")
+        st.warning("Nenhum produto encontrado com esse filtro. Clique em **Limpar** para ver todo o catálogo.")
     else:
         cols = st.columns(3)
         for idx, row in df_filtrado.iterrows():
@@ -782,27 +905,34 @@ else:
                 dica_cat = DICAS_CATEGORIA.get(row["Categoria"], "")
                 preco_fmt = formatar_moeda(row["Preco"])
                 por_kg = eh_vendido_por_kg(row["Peso"])
-                badge_peso = "⚖️ Por kg" if por_kg else f"📦 {row['Peso']}"
+                badge_peso = "⚖️ Por kg" if por_kg else f"📦 {html.escape(str(row['Peso']), quote=True)}"
                 label_preco = "Valor por kg (pesado na hora)" if por_kg else "Preço unitário"
                 preco_exibicao = f"{preco_fmt}/kg" if por_kg else preco_fmt
+
+                nome_escapado = html.escape(str(row["Produto"]), quote=True)
+                cat_escapada = html.escape(str(row["Categoria"]), quote=True)
+                dica_escapada = html.escape(dica_cat, quote=True)
 
                 foto_url = obter_foto_produto(row)
                 bloco_foto = ""
                 if foto_url:
+                    url_escapada = html.escape(foto_url, quote=True)
                     bloco_foto = (
-                        f'<div class="product-photo-box"><img src="{foto_url}" class="product-photo-img" '
-                        f'alt="{row["Produto"]}" onerror="this.parentElement.style.display=\'none\'"></div>'
+                        f'<div class="product-photo-box"><img src="{url_escapada}" class="product-photo-img" '
+                        f'alt="{nome_escapado}" onerror="this.parentElement.style.display=\'none\'"></div>'
                     )
 
                 st.markdown(
                     f"""<div class="product-card">
+<div>
 <div class="card-top-row">
-<span class="cat-badge">{icone_cat} {row['Categoria']}</span>
+<span class="cat-badge">{icone_cat} {cat_escapada}</span>
 <span class="weight-badge">{badge_peso}</span>
 </div>
 {bloco_foto}
-<div class="prod-name">{row['Produto']}</div>
-<div class="prod-tip">{dica_cat}</div>
+<div class="prod-name">{nome_escapado}</div>
+<div class="prod-tip">{dica_escapada}</div>
+</div>
 <div class="price-row">
 <span class="price-label">{label_preco}</span>
 <span class="price-number">{preco_exibicao}</span>
@@ -812,7 +942,7 @@ else:
                 )
 
                 chave_item = gerar_chave_carrinho(row["Produto"], row["Peso"])
-                if st.button("🛒 Adicionar", key=f"add_{chave_item}_{idx}", use_container_width=True):
+                if st.button("🛒 Adicionar", key=f"add_{chave_item}", use_container_width=True):
                     if chave_item in st.session_state.carrinho:
                         st.session_state.carrinho[chave_item]["qtd"] += 1
                     else:
@@ -830,10 +960,10 @@ else:
 # ==========================================
 st.markdown(
     f"""<div class="modern-footer">
-<h3>🐟 {NOME_LOJA}</h3>
-<p style="margin:4px 0; color:#e2e8f0;">📍 {ENDERECO_LOJA}</p>
-<p style="margin:4px 0; color:#e2e8f0;">🕒 {HORARIO_ATENDIMENTO}</p>
-<p style="margin:4px 0; color:#7dd3fc;">🚚 {CIDADE_REGIAO} • 📱 WhatsApp: <b>{TELEFONE_EXIBICAO}</b></p>
+<h3>🐟 {html.escape(NOME_LOJA)}</h3>
+<p style="margin:4px 0; color:#e2e8f0;">📍 {html.escape(ENDERECO_LOJA)}</p>
+<p style="margin:4px 0; color:#e2e8f0;">🕒 {html.escape(HORARIO_ATENDIMENTO)}</p>
+<p style="margin:4px 0; color:#7dd3fc;">🚚 {html.escape(CIDADE_REGIAO)} • 📱 WhatsApp: <b>{html.escape(TELEFONE_EXIBICAO)}</b></p>
 <p style="margin-top:14px; font-size:0.78rem; color:#94a3b8;">
 - Valores sujeitos à disponibilidade de estoque. Itens por kg são pesados na balança e confirmados pelo WhatsApp. Taxa de entrega: {formatar_moeda(TAXA_ENTREGA)}.
 </p>
