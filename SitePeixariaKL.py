@@ -1,14 +1,18 @@
 from datetime import datetime
 import html
+import io
 import os
 import unicodedata
 import urllib.parse
 try:
     from zoneinfo import ZoneInfo
-except ImportError:  # Fallback raro caso zoneinfo não exista no ambiente
+except ImportError:
     ZoneInfo = None
 
+from fpdf import FPDF
 import pandas as pd
+from PIL import Image
+import qrcode
 import streamlit as st
 
 # ==========================================
@@ -563,6 +567,11 @@ def normalizar_texto(texto: str) -> str:
     return " ".join(texto_limpo.lower().split())
 
 
+def texto_pdf_seguro(texto: str) -> str:
+    """Converte acentos para latin-1 de forma segura no FPDF padrão."""
+    return str(texto).encode("latin-1", errors="replace").decode("latin-1")
+
+
 def formatar_moeda(valor: float) -> str:
     return f"R$ {valor:,.2f}".replace(".", ",")
 
@@ -587,6 +596,94 @@ def obter_foto_produto(row: pd.Series) -> str:
     if url.startswith("https://") or url.startswith("http://"):
         return url
     return ""
+
+
+@st.cache_data(show_spinner=False)
+def gerar_qrcode_whatsapp_bytes(numero_zap: str) -> bytes:
+    """Gera imagem PNG otimizada via Pillow + qrcode para divulgação/balcão."""
+    url_zap = f"https://wa.me/{numero_zap}?text={urllib.parse.quote('Olá, Peixaria KL! Gostaria de fazer um pedido.')}"
+    qr = qrcode.QRCode(version=1, box_size=8, border=2)
+    qr.add_data(url_zap)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="#081b33", back_color="white").convert("RGB")
+    img = img.resize((220, 220), Image.Resampling.LANCZOS)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG", optimize=True)
+    return buf.getvalue()
+
+
+def gerar_pdf_pedido(
+    cliente: str,
+    itens_dict: dict,
+    tipo_entrega_str: str,
+    endereco_str: str,
+    pagamento_str: str,
+    troco_str: str,
+    obs_str: str,
+    subtotal_val: float,
+    entrega_val: float,
+    total_val: float,
+    tem_kg: bool,
+) -> bytes:
+    """Gera um comprovante/resumo simples do pedido em PDF via fpdf2."""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    pdf.set_font("Helvetica", "B", 16)
+    pdf.cell(0, 10, texto_pdf_seguro(f"{NOME_LOJA} - Resumo do Pedido"), ln=True)
+
+    pdf.set_font("Helvetica", "", 10)
+    pdf.cell(0, 6, texto_pdf_seguro(f"WhatsApp: {TELEFONE_EXIBICAO} | {CIDADE_REGIAO}"), ln=True)
+    pdf.cell(0, 6, texto_pdf_seguro(f"Endereco: {ENDERECO_LOJA}"), ln=True)
+    pdf.ln(4)
+
+    pdf.set_font("Helvetica", "B", 11)
+    pdf.cell(0, 7, texto_pdf_seguro(f"Cliente: {cliente.strip() or 'Nao informado'}"), ln=True)
+    pdf.set_font("Helvetica", "", 10)
+    pdf.cell(0, 6, texto_pdf_seguro(f"Recebimento: {tipo_entrega_str}"), ln=True)
+    if endereco_str.strip():
+        pdf.cell(0, 6, texto_pdf_seguro(f"Endereco de entrega: {endereco_str.strip()}"), ln=True)
+    pdf.cell(0, 6, texto_pdf_seguro(f"Pagamento: {pagamento_str}"), ln=True)
+    if troco_str.strip():
+        pdf.cell(0, 6, texto_pdf_seguro(f"Troco para: {troco_str.strip()}"), ln=True)
+    if obs_str.strip():
+        pdf.cell(0, 6, texto_pdf_seguro(f"Observacoes: {obs_str.strip()}"), ln=True)
+
+    pdf.ln(4)
+    pdf.set_font("Helvetica", "B", 11)
+    pdf.cell(0, 7, texto_pdf_seguro("Itens do pedido:"), ln=True)
+    pdf.set_font("Helvetica", "", 10)
+
+    for item in itens_dict.values():
+        sub = item["qtd"] * item["preco"]
+        if eh_vendido_por_kg(item["peso"]):
+            linha = f"- {item['qtd']}x {item['produto']} ({formatar_moeda(item['preco'])}/kg - pesar na balanca)"
+        else:
+            linha = f"- {item['qtd']}x {item['produto']} ({item['peso']}) = {formatar_moeda(sub)}"
+        pdf.cell(0, 6, texto_pdf_seguro(linha), ln=True)
+
+    pdf.ln(4)
+    rotulo_sub = "Subtotal estimado" if tem_kg else "Subtotal dos itens"
+    rotulo_tot = "Total estimado" if tem_kg else "Total"
+    pdf.set_font("Helvetica", "B", 11)
+    pdf.cell(0, 7, texto_pdf_seguro(f"{rotulo_sub}: {formatar_moeda(subtotal_val)}"), ln=True)
+    pdf.cell(0, 7, texto_pdf_seguro(f"Taxa de entrega: {formatar_moeda(entrega_val)}"), ln=True)
+    pdf.cell(0, 8, texto_pdf_seguro(f"{rotulo_tot}: {formatar_moeda(total_val)}"), ln=True)
+
+    if tem_kg:
+        pdf.ln(2)
+        pdf.set_font("Helvetica", "I", 9)
+        pdf.multi_cell(
+            0,
+            5,
+            texto_pdf_seguro("Obs.: Itens por kg sao pesados na balanca e o valor final e confirmado pelo WhatsApp."),
+        )
+
+    saida = pdf.output()
+    if isinstance(saida, (bytes, bytearray)):
+        return bytes(saida)
+    return str(saida).encode("latin-1", errors="replace")
 
 
 @st.cache_data(ttl=60)
@@ -687,7 +784,7 @@ with c_top4:
         st.rerun()
 
 # ==========================================
-# BARRA LATERAL: CARRINHO DE COMPRAS
+# BARRA LATERAL: CARRINHO DE COMPRAS + QR CODE
 # ==========================================
 with st.sidebar:
     st.markdown("## 🛒 Seu Pedido")
@@ -831,9 +928,35 @@ with st.sidebar:
             )
             st.button(texto_bloqueio, disabled=True, use_container_width=True)
 
+        pdf_bytes = gerar_pdf_pedido(
+            cliente=nome_cliente,
+            itens_dict=st.session_state.carrinho,
+            tipo_entrega_str=tipo_entrega,
+            endereco_str=endereco,
+            pagamento_str=forma_pagamento,
+            troco_str=troco_para,
+            obs_str=observacoes,
+            subtotal_val=subtotal_produtos,
+            entrega_val=valor_entrega,
+            total_val=total_final,
+            tem_kg=tem_item_kg,
+        )
+        st.download_button(
+            "📄 Baixar Resumo em PDF",
+            data=pdf_bytes,
+            file_name="pedido_peixaria_kl.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+        )
+
         if st.button("🗑️ Limpar Carrinho", use_container_width=True):
             st.session_state.carrinho = {}
             st.rerun()
+
+    st.markdown("---")
+    with st.expander("📱 QR Code WhatsApp (Balcão / Sacolas)"):
+        st.image(gerar_qrcode_whatsapp_bytes(WHATSAPP), use_container_width=True)
+        st.caption(f"Aponte a câmera para falar com {NOME_LOJA}")
 
 # ==========================================
 # NAVEGAÇÃO POR CATEGORIAS, BUSCA E GRADE
