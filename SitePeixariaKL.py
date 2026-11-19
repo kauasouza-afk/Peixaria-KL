@@ -214,8 +214,16 @@ header[data-testid="stHeader"] {{background: transparent;}}
     font-size: 1.12rem;
     font-weight: 700;
     line-height: 1.35;
-    min-height: 48px;
-    margin: 6px 0 14px 0;
+    min-height: 44px;
+    margin: 6px 0 6px 0;
+    text-align: left;
+}}
+.prod-tip {{
+    color: {text_muted};
+    font-size: 0.78rem;
+    font-weight: 500;
+    min-height: 22px;
+    margin-bottom: 12px;
     text-align: left;
 }}
 .price-row {{
@@ -270,8 +278,27 @@ div.stButton > button[kind="primary"] {{
 .stApp h1, .stApp h2, .stApp h3, .stApp label, .stApp .stMarkdown p, .stApp [data-testid="stCaptionContainer"] {{
     color: {text_main} !important;
 }}
-.stApp .hero-modern h1, .stApp .hero-modern p, .stApp .modern-footer h3, .stApp .modern-footer p, section[data-testid="stSidebar"] * {{
+.stApp .hero-modern h1, .stApp .hero-modern p, .stApp .modern-footer h3, .stApp .modern-footer p {{
     color: #ffffff !important;
+}}
+
+/* Sidebar e avisos com alto contraste */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] .stMarkdown p {{
+    color: #ffffff !important;
+}}
+section[data-testid="stSidebar"] [data-testid="stAlert"] {{
+    background-color: rgba(15, 23, 42, 0.75) !important;
+    border: 1px solid rgba(125, 211, 252, 0.35) !important;
+    border-radius: 12px !important;
+}}
+section[data-testid="stSidebar"] [data-testid="stAlert"] p,
+section[data-testid="stSidebar"] [data-testid="stAlert"] span,
+section[data-testid="stSidebar"] [data-testid="stAlert"] div {{
+    color: #f8fafc !important;
 }}
 </style>""",
     unsafe_allow_html=True,
@@ -284,6 +311,15 @@ ICONES_CATEGORIA = {
     "Camarões": "🦐",
     "Prontos para Fritar": "🍤",
     "Diversos": "🦀",
+}
+
+DICAS_CATEGORIA = {
+    "Filés": "Práticos para grelhar, assar ou empanar",
+    "Postas": "Ótimas para caldos, moquecas e assados",
+    "Peixes Inteiros": "Peça o corte desejado nas observações",
+    "Camarões": "Ideais para massas, risotos, bobó e petiscos",
+    "Prontos para Fritar": "Práticos para levar ao óleo ou airfryer",
+    "Diversos": "Complementos e frutos do mar selecionados",
 }
 
 FOTOS_ESPECIFICAS = {
@@ -676,6 +712,10 @@ with st.sidebar:
 
         if endereco_valido:
             st.link_button("📲 Enviar Pedido no WhatsApp", link_whatsapp, type="primary", use_container_width=True)
+            if len(link_whatsapp) > 1800:
+                st.warning(
+                    "⚠️ **Mensagem extensa:** Alguns navegadores limitam links muito longos. Se algum detalhe faltar ao abrir o WhatsApp, envie o pedido e complete na conversa."
+                )
         else:
             st.button("📲 Preencha o endereço para enviar", disabled=True, use_container_width=True)
 
@@ -684,97 +724,106 @@ with st.sidebar:
             st.rerun()
 
 # ==========================================
-# NAVEGAÇÃO POR CATEGORIAS E BUSCA
+# NAVEGAÇÃO POR CATEGORIAS, BUSCA E GRADE
 # ==========================================
-st.markdown("### 🧭 Explore por Categoria")
-contagem_cats = df_produtos["Categoria"].value_counts().to_dict()
-categorias_disponiveis = ["Todas"] + list(df_produtos["Categoria"].unique())
-
-if st.session_state.categoria_ativa not in categorias_disponiveis:
-    st.session_state.categoria_ativa = "Todas"
-
-cols_cat = st.columns(len(categorias_disponiveis))
-for i, cat in enumerate(categorias_disponiveis):
-    icone = ICONES_CATEGORIA.get(cat, "🌊")
-    qtd_cat = len(df_produtos) if cat == "Todas" else contagem_cats.get(cat, 0)
-    tipo_btn = "primary" if st.session_state.categoria_ativa == cat else "secondary"
-    if cols_cat[i].button(f"{icone} {cat} ({qtd_cat})", key=f"cat_{cat}", type=tipo_btn, use_container_width=True):
-        st.session_state.categoria_ativa = cat
-        st.rerun()
-
-busca = st.text_input(
-    "🔍 O que você procura hoje?",
-    placeholder="Pesquise por Salmao, Tilápia, Camarão, Bolinho, Posta...",
-)
-
-df_filtrado = df_produtos.copy()
-if st.session_state.categoria_ativa != "Todas":
-    df_filtrado = df_filtrado[df_filtrado["Categoria"] == st.session_state.categoria_ativa]
-
-if busca.strip():
-    termo_busca = normalizar_texto(busca)
-    mascara_busca = df_filtrado["Produto"].apply(lambda x: termo_busca in normalizar_texto(x)) | df_filtrado[
-        "Categoria"
-    ].apply(lambda x: termo_busca in normalizar_texto(x))
-    df_filtrado = df_filtrado[mascara_busca]
-
-df_filtrado = df_filtrado.reset_index(drop=True)
-st.caption(f"Mostrando **{len(df_filtrado)}** produto(s) em **{st.session_state.categoria_ativa}**")
-
-# ==========================================
-# GRADE DE PRODUTOS (COM SUPORTE A FOTOS)
-# ==========================================
-if df_filtrado.empty:
-    st.warning("Nenhum produto encontrado. Tente buscar por outro nome ou clique em 'Todas'.")
+if df_produtos.empty:
+    st.warning(
+        "🌊 No momento não há produtos marcados como disponíveis no catálogo. Fale diretamente conosco pelo WhatsApp para consultar as opções frescas do dia!"
+    )
+    st.link_button(
+        f"💬 Consultar Disponibilidade no WhatsApp ({TELEFONE_EXIBICAO})",
+        f"https://wa.me/{WHATSAPP}?text={urllib.parse.quote('Olá, Peixaria KL! Gostaria de saber quais peixes e porções estão disponíveis hoje.')}",
+        type="primary",
+    )
 else:
-    cols = st.columns(3)
-    for idx, row in df_filtrado.iterrows():
-        coluna = cols[idx % 3]
-        with coluna:
-            icone_cat = ICONES_CATEGORIA.get(row["Categoria"], "🐟")
-            preco_fmt = formatar_moeda(row["Preco"])
-            por_kg = eh_vendido_por_kg(row["Peso"])
-            badge_peso = "⚖️ Por kg" if por_kg else f"📦 {row['Peso']}"
-            label_preco = "Valor por kg (pesado na hora)" if por_kg else "Preço unitário"
-            preco_exibicao = f"{preco_fmt}/kg" if por_kg else preco_fmt
+    st.markdown("### 🧭 Explore por Categoria")
+    contagem_cats = df_produtos["Categoria"].value_counts().to_dict()
+    categorias_disponiveis = ["Todas"] + list(df_produtos["Categoria"].unique())
 
-            foto_url = obter_foto_produto(row)
-            bloco_foto = ""
-            if foto_url:
-                bloco_foto = (
-                    f'<div class="product-photo-box"><img src="{foto_url}" class="product-photo-img" '
-                    f'alt="{row["Produto"]}" onerror="this.parentElement.style.display=\'none\'"></div>'
-                )
+    if st.session_state.categoria_ativa not in categorias_disponiveis:
+        st.session_state.categoria_ativa = "Todas"
 
-            st.markdown(
-                f"""<div class="product-card">
+    cols_cat = st.columns(len(categorias_disponiveis))
+    for i, cat in enumerate(categorias_disponiveis):
+        icone = ICONES_CATEGORIA.get(cat, "🌊")
+        qtd_cat = len(df_produtos) if cat == "Todas" else contagem_cats.get(cat, 0)
+        tipo_btn = "primary" if st.session_state.categoria_ativa == cat else "secondary"
+        if cols_cat[i].button(f"{icone} {cat} ({qtd_cat})", key=f"cat_{cat}", type=tipo_btn, use_container_width=True):
+            st.session_state.categoria_ativa = cat
+            st.rerun()
+
+    busca = st.text_input(
+        "🔍 O que você procura hoje?",
+        placeholder="Pesquise por Salmao, Tilápia, Camarão, Bolinho, Posta...",
+    )
+
+    df_filtrado = df_produtos.copy()
+    if st.session_state.categoria_ativa != "Todas":
+        df_filtrado = df_filtrado[df_filtrado["Categoria"] == st.session_state.categoria_ativa]
+
+    if busca.strip():
+        termo_busca = normalizar_texto(busca)
+        mascara_busca = df_filtrado["Produto"].apply(lambda x: termo_busca in normalizar_texto(x)) | df_filtrado[
+            "Categoria"
+        ].apply(lambda x: termo_busca in normalizar_texto(x))
+        df_filtrado = df_filtrado[mascara_busca]
+
+    df_filtrado = df_filtrado.reset_index(drop=True)
+    st.caption(f"Mostrando **{len(df_filtrado)}** produto(s) em **{st.session_state.categoria_ativa}**")
+
+    if df_filtrado.empty:
+        st.warning("Nenhum produto encontrado. Tente buscar por outro nome ou clique em 'Todas'.")
+    else:
+        cols = st.columns(3)
+        for idx, row in df_filtrado.iterrows():
+            coluna = cols[idx % 3]
+            with coluna:
+                icone_cat = ICONES_CATEGORIA.get(row["Categoria"], "🐟")
+                dica_cat = DICAS_CATEGORIA.get(row["Categoria"], "")
+                preco_fmt = formatar_moeda(row["Preco"])
+                por_kg = eh_vendido_por_kg(row["Peso"])
+                badge_peso = "⚖️ Por kg" if por_kg else f"📦 {row['Peso']}"
+                label_preco = "Valor por kg (pesado na hora)" if por_kg else "Preço unitário"
+                preco_exibicao = f"{preco_fmt}/kg" if por_kg else preco_fmt
+
+                foto_url = obter_foto_produto(row)
+                bloco_foto = ""
+                if foto_url:
+                    bloco_foto = (
+                        f'<div class="product-photo-box"><img src="{foto_url}" class="product-photo-img" '
+                        f'alt="{row["Produto"]}" onerror="this.parentElement.style.display=\'none\'"></div>'
+                    )
+
+                st.markdown(
+                    f"""<div class="product-card">
 <div class="card-top-row">
 <span class="cat-badge">{icone_cat} {row['Categoria']}</span>
 <span class="weight-badge">{badge_peso}</span>
 </div>
 {bloco_foto}
 <div class="prod-name">{row['Produto']}</div>
+<div class="prod-tip">{dica_cat}</div>
 <div class="price-row">
 <span class="price-label">{label_preco}</span>
 <span class="price-number">{preco_exibicao}</span>
 </div>
 </div>""",
-                unsafe_allow_html=True,
-            )
+                    unsafe_allow_html=True,
+                )
 
-            chave_item = gerar_chave_carrinho(row["Produto"], row["Peso"])
-            if st.button("🛒 Adicionar", key=f"add_{chave_item}_{idx}", use_container_width=True):
-                if chave_item in st.session_state.carrinho:
-                    st.session_state.carrinho[chave_item]["qtd"] += 1
-                else:
-                    st.session_state.carrinho[chave_item] = {
-                        "produto": row["Produto"],
-                        "peso": row["Peso"],
-                        "preco": float(row["Preco"]),
-                        "qtd": 1,
-                    }
-                st.toast(f"✅ {row['Produto']} adicionado ao carrinho!")
-                st.rerun()
+                chave_item = gerar_chave_carrinho(row["Produto"], row["Peso"])
+                if st.button("🛒 Adicionar", key=f"add_{chave_item}_{idx}", use_container_width=True):
+                    if chave_item in st.session_state.carrinho:
+                        st.session_state.carrinho[chave_item]["qtd"] += 1
+                    else:
+                        st.session_state.carrinho[chave_item] = {
+                            "produto": row["Produto"],
+                            "peso": row["Peso"],
+                            "preco": float(row["Preco"]),
+                            "qtd": 1,
+                        }
+                    st.toast(f"✅ {row['Produto']} adicionado ao carrinho!")
+                    st.rerun()
 
 # ==========================================
 # RODAPÉ MODERNO
